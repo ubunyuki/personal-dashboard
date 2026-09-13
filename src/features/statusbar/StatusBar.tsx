@@ -1,6 +1,7 @@
 import { LayoutDashboard, ListTodo, StickyNote } from 'lucide-react'
 import { useUiStore, type Tab } from '../../store/uiStore'
 import { Clock } from './Clock'
+import { QuickActions } from './QuickActions'
 import { ThemeToggle } from './ThemeToggle'
 
 const tabs: Array<{ id: Tab; label: string; Icon: typeof LayoutDashboard }> = [
@@ -14,7 +15,7 @@ export function StatusBar() {
   const setActiveTab = useUiStore((s) => s.setActiveTab)
   return (
     <header className="flex h-11 shrink-0 items-center gap-1 border-b border-slate-200 bg-white/85 px-2 backdrop-blur dark:border-slate-800 dark:bg-slate-900/85">
-      <span className="select-none pl-1 pr-2 text-sm font-semibold tracking-tight">WorkDesk</span>
+      <span className="pr-2 pl-1 text-sm font-semibold tracking-tight select-none">WorkDesk</span>
       <nav className="flex items-center gap-1">
         {tabs.map(({ id, label, Icon }) => (
           <button
@@ -33,6 +34,8 @@ export function StatusBar() {
         ))}
       </nav>
       <div className="ml-auto flex items-center gap-2 pr-1">
+        <QuickActions />
+        <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
         <ThemeToggle />
         <Clock />
       </div>

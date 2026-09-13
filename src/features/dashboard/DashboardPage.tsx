@@ -1,10 +1,26 @@
-import { EmptyState } from '../../components/ui/EmptyState'
+import { useMemo } from 'react'
+import { useNow } from '../../lib/useNow'
+import { useAppStore } from '../../store/appStore'
+import { metrics, taskBuckets } from '../../store/selectors'
+import { MetricTiles } from './MetricTiles'
+import { RecentNotes } from './RecentNotes'
+import { TaskBucketWidget } from './TaskBucketWidget'
 
 export function DashboardPage() {
+  const tasks = useAppStore((s) => s.tasks)
+  const now = useNow()
+  const buckets = useMemo(() => taskBuckets(tasks, now), [tasks, now])
+  const m = useMemo(() => metrics(tasks, now), [tasks, now])
   return (
-    <EmptyState
-      title="Dashboard coming online"
-      hint="Task buckets, metrics, recent notes and upcoming events land in milestones 2–5."
-    />
+    <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4">
+      <MetricTiles metrics={m} />
+      <div className="grid gap-3 md:grid-cols-2">
+        <TaskBucketWidget title="Overdue" tasks={buckets.overdue} now={now} emptyText="Nothing overdue." />
+        <TaskBucketWidget title="Due today" tasks={buckets.dueToday} now={now} emptyText="Clear for today." />
+        <TaskBucketWidget title="Due this week" tasks={buckets.dueWeek} now={now} emptyText="The week ahead is clear." />
+        <TaskBucketWidget title="In progress" tasks={buckets.inProgress} now={now} emptyText="Nothing in flight." />
+      </div>
+      <RecentNotes />
+    </div>
   )
 }

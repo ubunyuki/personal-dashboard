@@ -3,6 +3,7 @@ import { DashboardPage } from './features/dashboard/DashboardPage'
 import { TasksPage } from './features/tasks/TasksPage'
 import { NotesPage } from './features/notes/NotesPage'
 import { TaskEditor } from './features/tasks/TaskEditor'
+import { SettingsModal } from './features/settings/SettingsModal'
 import { useUiStore } from './store/uiStore'
 import { useThemeEffect } from './lib/theme'
 
@@ -11,6 +12,7 @@ export default function App() {
   const tab = useUiStore((s) => s.activeTab)
   const persisted = useUiStore((s) => s.storagePersisted)
   const editingTask = useUiStore((s) => s.editingTask)
+  const settingsOpen = useUiStore((s) => s.settingsOpen)
   return (
     <div className="flex h-full min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <StatusBar />
@@ -30,6 +32,7 @@ export default function App() {
         </span>
       </footer>
       {editingTask !== null && <TaskEditor key={editingTask} />}
+      {settingsOpen && <SettingsModal />}
     </div>
   )
 }

@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { SCHEMA_VERSION, type PersistedAppData, type Settings, type Task } from '../types'
+import { SCHEMA_VERSION, type Note, type PersistedAppData, type Settings, type Task } from '../types'
 import { newId, nowIso } from '../lib/id'
+import { splitNoteForTask } from '../lib/notes/splitNoteForTask'
 import { defaultAppData, runMigrations } from './migrations'
 
 export type TaskInput = Pick<Task, 'title'> &
@@ -11,6 +12,11 @@ export type AppStore = PersistedAppData & {
   addTask: (input: TaskInput) => Task
   updateTask: (id: string, patch: Partial<Omit<Task, 'id' | 'createdAt'>>) => void
   deleteTask: (id: string) => void
+  addNote: (text: string) => Note
+  updateNote: (id: string, text: string) => void
+  deleteNote: (id: string) => void
+  /** Returns the created task, or null if the note is missing, empty, or already converted. */
+  convertNoteToTask: (noteId: string) => Task | null
   updateSettings: (patch: Partial<Settings>) => void
 }
 
@@ -23,7 +29,7 @@ function withCompletion(prev: Task, patch: Partial<Task>): Partial<Task> {
 
 export const useAppStore = create<AppStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...defaultAppData(),
 
       addTask: (input) => {
@@ -63,6 +69,46 @@ export const useAppStore = create<AppStore>()(
           ),
           lastChangeAt: nowIso(),
         })),
+
+      addNote: (text) => {
+        const now = nowIso()
+        const note: Note = { id: newId(), text: text.trim(), createdAt: now, updatedAt: now }
+        set((s) => ({ notes: [note, ...s.notes], lastChangeAt: now }))
+        return note
+      },
+
+      updateNote: (id, text) =>
+        set((s) => ({
+          notes: s.notes.map((n) =>
+            n.id === id ? { ...n, text: text.trim(), updatedAt: nowIso() } : n,
+          ),
+          lastChangeAt: nowIso(),
+        })),
+
+      deleteNote: (id) =>
+        set((s) => ({
+          notes: s.notes.filter((n) => n.id !== id),
+          // Tasks created from this note keep living, but drop the dangling link.
+          tasks: s.tasks.map((t) =>
+            t.sourceNoteId === id ? { ...t, sourceNoteId: undefined } : t,
+          ),
+          lastChangeAt: nowIso(),
+        })),
+
+      convertNoteToTask: (noteId) => {
+        const note = get().notes.find((n) => n.id === noteId)
+        if (!note || note.convertedToTaskId) return null
+        const { title, description } = splitNoteForTask(note.text)
+        if (!title) return null
+        const task = get().addTask({ title, description, sourceNoteId: noteId })
+        set((s) => ({
+          notes: s.notes.map((n) =>
+            n.id === noteId ? { ...n, convertedToTaskId: task.id, updatedAt: nowIso() } : n,
+          ),
+          lastChangeAt: nowIso(),
+        }))
+        return task
+      },
 
       updateSettings: (patch) =>
         set((s) => ({
