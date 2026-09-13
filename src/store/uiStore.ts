@@ -22,6 +22,7 @@ type UiStore = {
   restorePrompt: 'tripwire' | 'import' | null
   bellOpen: boolean
   calendar: { open: boolean; date: string | null }
+  whiteboardOpen: boolean
   setActiveTab: (tab: Tab) => void
   setStoragePersisted: (granted: boolean) => void
   openTaskEditor: (id?: string) => void
@@ -37,6 +38,8 @@ type UiStore = {
   toggleCalendar: () => void
   openCalendar: (date?: string) => void
   closeCalendar: () => void
+  openWhiteboard: () => void
+  closeWhiteboard: () => void
 }
 
 export const useUiStore = create<UiStore>()((set) => ({
@@ -49,6 +52,7 @@ export const useUiStore = create<UiStore>()((set) => ({
   restorePrompt: null,
   bellOpen: false,
   calendar: { open: false, date: null },
+  whiteboardOpen: false,
   setActiveTab: (tab) => set({ activeTab: tab }),
   setStoragePersisted: (granted) => set({ storagePersisted: granted }),
   openTaskEditor: (id) => set({ editingTask: id ?? 'new' }),
@@ -70,4 +74,7 @@ export const useUiStore = create<UiStore>()((set) => ({
     ),
   openCalendar: (date) => set({ calendar: { open: true, date: date ?? null }, bellOpen: false }),
   closeCalendar: () => set((s) => ({ calendar: { ...s.calendar, open: false } })),
+  openWhiteboard: () =>
+    set((s) => ({ whiteboardOpen: true, bellOpen: false, calendar: { ...s.calendar, open: false } })),
+  closeWhiteboard: () => set({ whiteboardOpen: false }),
 }))

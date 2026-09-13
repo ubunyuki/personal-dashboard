@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import {
   SCHEMA_VERSION,
+  type BoardMeta,
   type CalEvent,
   type Note,
   type PersistedAppData,
@@ -33,6 +34,11 @@ export type AppStore = PersistedAppData & {
   addEvent: (input: EventInput) => CalEvent
   updateEvent: (id: string, patch: Partial<Omit<CalEvent, 'id' | 'createdAt'>>) => void
   deleteEvent: (id: string) => void
+  addBoard: (name: string) => BoardMeta
+  renameBoard: (id: string, name: string) => void
+  deleteBoard: (id: string) => void
+  /** Bumped by whiteboard autosave so backups notice board edits. */
+  touchBoard: (id: string) => void
   /** Restore path: replaces all persisted data via merge-set (replace-mode would strip actions). */
   replaceAll: (data: PersistedAppData) => void
   updateSettings: (patch: SettingsPatch) => void
@@ -151,6 +157,38 @@ export const useAppStore = create<AppStore>()(
       deleteEvent: (id) =>
         set((s) => ({
           events: s.events.filter((e) => e.id !== id),
+          lastChangeAt: nowIso(),
+        })),
+
+      addBoard: (name) => {
+        const now = nowIso()
+        const board: BoardMeta = {
+          id: newId(),
+          name: name.trim() || 'Untitled board',
+          createdAt: now,
+          updatedAt: now,
+        }
+        set((s) => ({ boards: [board, ...s.boards], lastChangeAt: now }))
+        return board
+      },
+
+      renameBoard: (id, name) =>
+        set((s) => ({
+          boards: s.boards.map((b) =>
+            b.id === id ? { ...b, name: name.trim() || b.name, updatedAt: nowIso() } : b,
+          ),
+          lastChangeAt: nowIso(),
+        })),
+
+      deleteBoard: (id) =>
+        set((s) => ({
+          boards: s.boards.filter((b) => b.id !== id),
+          lastChangeAt: nowIso(),
+        })),
+
+      touchBoard: (id) =>
+        set((s) => ({
+          boards: s.boards.map((b) => (b.id === id ? { ...b, updatedAt: nowIso() } : b)),
           lastChangeAt: nowIso(),
         })),
 

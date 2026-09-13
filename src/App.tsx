@@ -1,4 +1,5 @@
 import { StatusBar } from './features/statusbar/StatusBar'
+import { WhiteboardOverlay } from './features/whiteboard/WhiteboardOverlay'
 import { CalendarPopover } from './features/statusbar/CalendarPopover'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { TasksPage } from './features/tasks/TasksPage'
@@ -37,6 +38,7 @@ export default function App() {
         </span>
       </footer>
       <CalendarPopover />
+      <WhiteboardOverlay />
       {editingTask !== null && <TaskEditor key={editingTask} />}
       {settingsOpen && <SettingsModal />}
       {restorePrompt !== null && <RestorePrompt />}
