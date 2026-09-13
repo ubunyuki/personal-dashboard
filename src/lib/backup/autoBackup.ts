@@ -91,4 +91,9 @@ export async function initBackups(): Promise<void> {
   await refreshBackupStatus()
   void maybeBackup('boot')
   window.setInterval(() => void maybeBackup('tick'), TICK)
+  // Wake-up check: returning to the tab Monday morning should snapshot
+  // immediately, not wait for the next interval tick.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') void maybeBackup('tick')
+  })
 }

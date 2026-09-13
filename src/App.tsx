@@ -10,9 +10,13 @@ import { RestorePrompt } from './features/settings/RestorePrompt'
 import { BackupBanner } from './features/settings/BackupBanner'
 import { useUiStore } from './store/uiStore'
 import { useThemeEffect } from './lib/theme'
+import { usePwaUpdatePoll } from './lib/usePwaUpdatePoll'
+import { useShortcuts } from './lib/useShortcuts'
 
 export default function App() {
   useThemeEffect()
+  usePwaUpdatePoll()
+  useShortcuts()
   const tab = useUiStore((s) => s.activeTab)
   const persisted = useUiStore((s) => s.storagePersisted)
   const editingTask = useUiStore((s) => s.editingTask)
