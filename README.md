@@ -28,4 +28,4 @@ previous deploy stays live).
 
 1. Open the Netlify URL in Edge.
 2. Menu → Apps → “Install this site as an app” (improves storage persistence).
-3. From milestone 4 on: Settings → pick a backup folder inside OneDrive.
+3. Settings (gear icon) → Backups → “Choose backup folder…” and pick a folder inside OneDrive. Snapshots are written automatically (hourly when data changed, newest 30 kept).

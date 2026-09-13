@@ -32,3 +32,15 @@ export function isTaskOverdue(
 export function formatDueLabel(dueDate: string, dueTime?: string): string {
   return format(parseLocalDate(dueDate), 'EEE d MMM') + (dueTime ? ` ${dueTime}` : '')
 }
+
+/** Compact age like "just now", "5m ago", "3h ago", "4d ago". */
+export function formatAge(iso: string, now: Date): string {
+  const ms = now.getTime() - Date.parse(iso)
+  if (Number.isNaN(ms)) return '?'
+  const minutes = Math.floor(ms / 60_000)
+  if (minutes < 1) return 'just now'
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 48) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}

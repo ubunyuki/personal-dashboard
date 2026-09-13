@@ -1,5 +1,6 @@
 import { LayoutDashboard, ListTodo, StickyNote } from 'lucide-react'
 import { useUiStore, type Tab } from '../../store/uiStore'
+import { BackupChip } from './BackupChip'
 import { Clock } from './Clock'
 import { QuickActions } from './QuickActions'
 import { ThemeToggle } from './ThemeToggle'
@@ -34,6 +35,7 @@ export function StatusBar() {
         ))}
       </nav>
       <div className="ml-auto flex items-center gap-2 pr-1">
+        <BackupChip />
         <QuickActions />
         <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
         <ThemeToggle />

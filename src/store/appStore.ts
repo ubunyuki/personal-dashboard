@@ -17,6 +17,8 @@ export type AppStore = PersistedAppData & {
   deleteNote: (id: string) => void
   /** Returns the created task, or null if the note is missing, empty, or already converted. */
   convertNoteToTask: (noteId: string) => Task | null
+  /** Restore path: replaces all persisted data via merge-set (replace-mode would strip actions). */
+  replaceAll: (data: PersistedAppData) => void
   updateSettings: (patch: Partial<Settings>) => void
 }
 
@@ -109,6 +111,8 @@ export const useAppStore = create<AppStore>()(
         }))
         return task
       },
+
+      replaceAll: (data) => set({ ...data }),
 
       updateSettings: (patch) =>
         set((s) => ({

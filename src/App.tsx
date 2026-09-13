@@ -4,6 +4,8 @@ import { TasksPage } from './features/tasks/TasksPage'
 import { NotesPage } from './features/notes/NotesPage'
 import { TaskEditor } from './features/tasks/TaskEditor'
 import { SettingsModal } from './features/settings/SettingsModal'
+import { RestorePrompt } from './features/settings/RestorePrompt'
+import { BackupBanner } from './features/settings/BackupBanner'
 import { useUiStore } from './store/uiStore'
 import { useThemeEffect } from './lib/theme'
 
@@ -13,9 +15,11 @@ export default function App() {
   const persisted = useUiStore((s) => s.storagePersisted)
   const editingTask = useUiStore((s) => s.editingTask)
   const settingsOpen = useUiStore((s) => s.settingsOpen)
+  const restorePrompt = useUiStore((s) => s.restorePrompt)
   return (
     <div className="flex h-full min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <StatusBar />
+      <BackupBanner />
       <main className="flex-1 overflow-y-auto">
         {tab === 'dashboard' && <DashboardPage />}
         {tab === 'tasks' && <TasksPage />}
@@ -33,6 +37,7 @@ export default function App() {
       </footer>
       {editingTask !== null && <TaskEditor key={editingTask} />}
       {settingsOpen && <SettingsModal />}
+      {restorePrompt !== null && <RestorePrompt />}
     </div>
   )
 }
