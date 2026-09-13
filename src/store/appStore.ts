@@ -7,6 +7,7 @@ import {
   type PersistedAppData,
   type Settings,
   type Task,
+  type WeatherSettings,
 } from '../types'
 import { newId, nowIso } from '../lib/id'
 import { splitNoteForTask } from '../lib/notes/splitNoteForTask'
@@ -16,6 +17,9 @@ export type TaskInput = Pick<Task, 'title'> &
   Partial<Omit<Task, 'id' | 'title' | 'createdAt' | 'updatedAt'>>
 
 export type EventInput = Pick<CalEvent, 'title' | 'date'> & Partial<Pick<CalEvent, 'time'>>
+
+/** Settings patch where the nested weather object may itself be partial. */
+export type SettingsPatch = Partial<Omit<Settings, 'weather'>> & { weather?: Partial<WeatherSettings> }
 
 export type AppStore = PersistedAppData & {
   addTask: (input: TaskInput) => Task
@@ -31,7 +35,7 @@ export type AppStore = PersistedAppData & {
   deleteEvent: (id: string) => void
   /** Restore path: replaces all persisted data via merge-set (replace-mode would strip actions). */
   replaceAll: (data: PersistedAppData) => void
-  updateSettings: (patch: Partial<Settings>) => void
+  updateSettings: (patch: SettingsPatch) => void
 }
 
 /** Keep completedAt in sync with status transitions unless the patch sets it explicitly. */

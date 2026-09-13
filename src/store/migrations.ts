@@ -3,7 +3,7 @@ import { SCHEMA_VERSION, type PersistedAppData, type Settings } from '../types'
 export function defaultSettings(): Settings {
   return {
     theme: 'system',
-    weather: { enabled: true, unit: 'celsius' },
+    weather: { enabled: true, source: 'hko', hkoStation: 'Hong Kong Observatory', unit: 'celsius' },
     weekStartsOn: 1,
   }
 }
@@ -20,7 +20,10 @@ export function defaultAppData(): PersistedAppData {
 }
 
 /** One entry per version bump: steps[n] migrates shape n → n+1. */
-const steps: Record<number, (d: Partial<PersistedAppData>) => Partial<PersistedAppData>> = {}
+const steps: Record<number, (d: Partial<PersistedAppData>) => Partial<PersistedAppData>> = {
+  // v1 → v2: settings.weather gained source + hkoStation; the defaults spread fills them.
+  1: (d) => d,
+}
 
 /**
  * Single migration path for BOTH zustand persist rehydration and backup

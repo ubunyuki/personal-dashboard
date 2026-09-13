@@ -5,7 +5,7 @@
  * - date: LOCAL calendar string 'yyyy-MM-dd'; time: 'HH:mm' (24h).
  *   Parse with date-fns, never `new Date('yyyy-MM-dd')` (that is UTC midnight).
  */
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 export type TaskStatus = 'todo' | 'in-progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
@@ -60,8 +60,13 @@ export interface WeatherLocation {
   longitude: number
 }
 
+export type WeatherSource = 'hko' | 'open-meteo'
+
 export interface WeatherSettings {
   enabled: boolean
+  /** 'hko' = Hong Kong Observatory official readings; 'open-meteo' = any city. */
+  source: WeatherSource
+  hkoStation: string
   location?: WeatherLocation
   unit: 'celsius' | 'fahrenheit'
 }

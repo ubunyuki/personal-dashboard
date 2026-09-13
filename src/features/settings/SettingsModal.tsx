@@ -5,6 +5,7 @@ import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 import type { Settings } from '../../types'
 import { BackupSection } from './BackupSection'
+import { WeatherSection } from './WeatherSection'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -48,9 +49,7 @@ export function SettingsModal() {
         </p>
       </Section>
       <Section title="Weather">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Weather arrives in milestone 6 — Hong Kong Observatory readings, with a station picker.
-        </p>
+        <WeatherSection />
       </Section>
     </Modal>
   )
