@@ -20,6 +20,8 @@ type UiStore = {
   noteFocusToken: number
   backup: BackupStatus
   restorePrompt: 'tripwire' | 'import' | null
+  bellOpen: boolean
+  calendar: { open: boolean; date: string | null }
   setActiveTab: (tab: Tab) => void
   setStoragePersisted: (granted: boolean) => void
   openTaskEditor: (id?: string) => void
@@ -30,6 +32,11 @@ type UiStore = {
   setBackupStatus: (status: BackupStatus) => void
   openRestorePrompt: (kind: 'tripwire' | 'import') => void
   closeRestorePrompt: () => void
+  toggleBell: () => void
+  closeBell: () => void
+  toggleCalendar: () => void
+  openCalendar: (date?: string) => void
+  closeCalendar: () => void
 }
 
 export const useUiStore = create<UiStore>()((set) => ({
@@ -40,6 +47,8 @@ export const useUiStore = create<UiStore>()((set) => ({
   noteFocusToken: 0,
   backup: { mode: 'unconfigured', lastBackupAt: null },
   restorePrompt: null,
+  bellOpen: false,
+  calendar: { open: false, date: null },
   setActiveTab: (tab) => set({ activeTab: tab }),
   setStoragePersisted: (granted) => set({ storagePersisted: granted }),
   openTaskEditor: (id) => set({ editingTask: id ?? 'new' }),
@@ -50,4 +59,15 @@ export const useUiStore = create<UiStore>()((set) => ({
   setBackupStatus: (status) => set({ backup: status }),
   openRestorePrompt: (kind) => set({ restorePrompt: kind, settingsOpen: false }),
   closeRestorePrompt: () => set({ restorePrompt: null }),
+  toggleBell: () =>
+    set((s) => ({ bellOpen: !s.bellOpen, calendar: { ...s.calendar, open: false } })),
+  closeBell: () => set({ bellOpen: false }),
+  toggleCalendar: () =>
+    set((s) =>
+      s.calendar.open
+        ? { calendar: { ...s.calendar, open: false } }
+        : { calendar: { open: true, date: null }, bellOpen: false },
+    ),
+  openCalendar: (date) => set({ calendar: { open: true, date: date ?? null }, bellOpen: false }),
+  closeCalendar: () => set((s) => ({ calendar: { ...s.calendar, open: false } })),
 }))

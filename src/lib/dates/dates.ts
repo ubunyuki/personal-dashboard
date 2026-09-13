@@ -44,3 +44,20 @@ export function formatAge(iso: string, now: Date): string {
   if (hours < 48) return `${hours}h ago`
   return `${Math.floor(hours / 24)}d ago`
 }
+
+export interface MonthCell {
+  date: string
+  day: number
+  inMonth: boolean
+}
+
+/** 6×7 month grid, Monday start — always 42 cells so the popover never jumps height. */
+export function buildMonthGrid(year: number, monthIndex0: number): MonthCell[] {
+  const first = new Date(year, monthIndex0, 1)
+  const mondayOffset = (first.getDay() + 6) % 7
+  const start = addDays(first, -mondayOffset)
+  return Array.from({ length: 42 }, (_, i) => {
+    const d = addDays(start, i)
+    return { date: toLocalDate(d), day: d.getDate(), inMonth: d.getMonth() === monthIndex0 }
+  })
+}

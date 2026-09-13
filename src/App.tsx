@@ -1,4 +1,5 @@
 import { StatusBar } from './features/statusbar/StatusBar'
+import { CalendarPopover } from './features/statusbar/CalendarPopover'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { TasksPage } from './features/tasks/TasksPage'
 import { NotesPage } from './features/notes/NotesPage'
@@ -35,6 +36,7 @@ export default function App() {
               : 'storage: best-effort — install as app to protect data'}
         </span>
       </footer>
+      <CalendarPopover />
       {editingTask !== null && <TaskEditor key={editingTask} />}
       {settingsOpen && <SettingsModal />}
       {restorePrompt !== null && <RestorePrompt />}

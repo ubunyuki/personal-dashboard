@@ -1,12 +1,21 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { SCHEMA_VERSION, type Note, type PersistedAppData, type Settings, type Task } from '../types'
+import {
+  SCHEMA_VERSION,
+  type CalEvent,
+  type Note,
+  type PersistedAppData,
+  type Settings,
+  type Task,
+} from '../types'
 import { newId, nowIso } from '../lib/id'
 import { splitNoteForTask } from '../lib/notes/splitNoteForTask'
 import { defaultAppData, runMigrations } from './migrations'
 
 export type TaskInput = Pick<Task, 'title'> &
   Partial<Omit<Task, 'id' | 'title' | 'createdAt' | 'updatedAt'>>
+
+export type EventInput = Pick<CalEvent, 'title' | 'date'> & Partial<Pick<CalEvent, 'time'>>
 
 export type AppStore = PersistedAppData & {
   addTask: (input: TaskInput) => Task
@@ -17,6 +26,9 @@ export type AppStore = PersistedAppData & {
   deleteNote: (id: string) => void
   /** Returns the created task, or null if the note is missing, empty, or already converted. */
   convertNoteToTask: (noteId: string) => Task | null
+  addEvent: (input: EventInput) => CalEvent
+  updateEvent: (id: string, patch: Partial<Omit<CalEvent, 'id' | 'createdAt'>>) => void
+  deleteEvent: (id: string) => void
   /** Restore path: replaces all persisted data via merge-set (replace-mode would strip actions). */
   replaceAll: (data: PersistedAppData) => void
   updateSettings: (patch: Partial<Settings>) => void
@@ -111,6 +123,32 @@ export const useAppStore = create<AppStore>()(
         }))
         return task
       },
+
+      addEvent: (input) => {
+        const now = nowIso()
+        const event: CalEvent = {
+          id: newId(),
+          title: input.title.trim(),
+          date: input.date,
+          time: input.time || undefined,
+          createdAt: now,
+          updatedAt: now,
+        }
+        set((s) => ({ events: [...s.events, event], lastChangeAt: now }))
+        return event
+      },
+
+      updateEvent: (id, patch) =>
+        set((s) => ({
+          events: s.events.map((e) => (e.id === id ? { ...e, ...patch, updatedAt: nowIso() } : e)),
+          lastChangeAt: nowIso(),
+        })),
+
+      deleteEvent: (id) =>
+        set((s) => ({
+          events: s.events.filter((e) => e.id !== id),
+          lastChangeAt: nowIso(),
+        })),
 
       replaceAll: (data) => set({ ...data }),
 
