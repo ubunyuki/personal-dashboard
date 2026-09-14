@@ -1,4 +1,4 @@
-import { NotebookPen, Plus, Presentation, Settings } from 'lucide-react'
+import { HelpCircle, NotebookPen, Plus, Presentation, Settings } from 'lucide-react'
 import { useUiStore } from '../../store/uiStore'
 
 export const iconBtnCls =
@@ -8,6 +8,7 @@ export function QuickActions() {
   const openWhiteboard = useUiStore((s) => s.openWhiteboard)
   const focusNoteCapture = useUiStore((s) => s.focusNoteCapture)
   const openTaskEditor = useUiStore((s) => s.openTaskEditor)
+  const openHelp = useUiStore((s) => s.openHelp)
   const openSettings = useUiStore((s) => s.openSettings)
   return (
     <div className="flex items-center gap-0.5">
@@ -19,6 +20,9 @@ export function QuickActions() {
       </button>
       <button type="button" title="New task" className={iconBtnCls} onClick={() => openTaskEditor()}>
         <Plus size={16} strokeWidth={1.75} />
+      </button>
+      <button type="button" title="Help" className={iconBtnCls} onClick={openHelp}>
+        <HelpCircle size={16} strokeWidth={1.75} />
       </button>
       <button type="button" title="Settings" className={iconBtnCls} onClick={openSettings}>
         <Settings size={16} strokeWidth={1.75} />

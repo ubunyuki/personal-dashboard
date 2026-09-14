@@ -2,34 +2,43 @@
 
 A single-user "mini OS" dashboard for daily work: status bar (live clock,
 Hong Kong Observatory weather, reminders bell, month calendar), a task board,
-quick notes that convert into tasks, and an embedded Excalidraw whiteboard.
-No backend and no database — data lives in the browser, protected by an
-automatic backup system that writes JSON snapshots to a OneDrive folder.
+quick notes that convert into tasks, grouped web bookmarks, and an embedded
+Excalidraw whiteboard. No backend and no database — data lives in the
+browser, protected by an automatic backup system that writes JSON snapshots
+to a OneDrive folder.
 
 ## Features
 
 - **Dashboard** — overdue / due-today / due-this-week / in-progress buckets,
-  metric tiles, upcoming events, recent notes.
+  metric tiles, upcoming events, recent notes + bookmarks; each section has
+  its own accent colour.
 - **Tasks** — quick add, filters/sorts, editor (status, priority, due
   date+time, project tag), status cycling on rows.
-- **Notes** — instant capture (`Ctrl+Enter`), inline edit, convert-to-task
+- **Notes** — instant capture (`Ctrl+Enter`; resizable box, remembered
+  height, drafts survive tab switches), inline edit, convert-to-task
   (first line → title, rest → description, linked both ways).
-- **Calendar** — month popover plotting task deadlines + manual events,
-  inline event add per day.
+- **Bookmarks** — save links into groups, search across them, favicons,
+  open-in-new-tab; included in backups.
+- **Calendar** — click the clock to open a month popover plotting task
+  deadlines + manual events, inline event add per day.
 - **Reminders bell** — overdue + due-soon tasks and today's events.
 - **Whiteboard** — Excalidraw, multiple boards, autosave, PNG/SVG download.
-- **Weather** — HKO official readings (station picker) or Open-Meteo city.
+- **Weather** — HKO official readings (station picker) or Open-Meteo city;
+  chip shows location + temperature + humidity, with a full-name or
+  short-code label style.
+- **Help** — in-app user guide (`?` or the help button next to Settings).
 - **Backups** — auto-snapshots to a picked folder (hourly on change, keeps
   newest 30), staleness nudges, manual export/restore, storage-clear tripwire.
 
-Keyboard: `N` new note · `T` new task · `Ctrl+Enter` save note · `Esc` close.
+Keyboard: `N` new note · `T` new task · `B` bookmarks · `?` help ·
+`Ctrl+Enter` save note · `Esc` close.
 
 ## Develop (Mac)
 
 ```sh
 npm install
 npm run dev        # http://localhost:5173
-npx vitest run     # 38 unit tests
+npx vitest run     # 51 unit tests
 npm run build && npm run preview
 ```
 

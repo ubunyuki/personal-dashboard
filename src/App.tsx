@@ -7,6 +7,7 @@ import { NotesPage } from './features/notes/NotesPage'
 import { BookmarksPage } from './features/bookmarks/BookmarksPage'
 import { TaskEditor } from './features/tasks/TaskEditor'
 import { SettingsModal } from './features/settings/SettingsModal'
+import { HelpModal } from './features/help/HelpModal'
 import { RestorePrompt } from './features/settings/RestorePrompt'
 import { BackupBanner } from './features/settings/BackupBanner'
 import { useUiStore } from './store/uiStore'
@@ -22,6 +23,7 @@ export default function App() {
   const persisted = useUiStore((s) => s.storagePersisted)
   const editingTask = useUiStore((s) => s.editingTask)
   const settingsOpen = useUiStore((s) => s.settingsOpen)
+  const helpOpen = useUiStore((s) => s.helpOpen)
   const restorePrompt = useUiStore((s) => s.restorePrompt)
   return (
     <div className="flex h-full min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -47,6 +49,7 @@ export default function App() {
       <WhiteboardOverlay />
       {editingTask !== null && <TaskEditor key={editingTask} />}
       {settingsOpen && <SettingsModal />}
+      {helpOpen && <HelpModal />}
       {restorePrompt !== null && <RestorePrompt />}
     </div>
   )

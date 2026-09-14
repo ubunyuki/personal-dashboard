@@ -1,13 +1,18 @@
 import { useEffect, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 
+const sizeCls = { md: 'max-w-lg', lg: 'max-w-2xl' } as const
+
 export function Modal({
   title,
   onClose,
+  size = 'md',
   children,
 }: {
   title: string
   onClose: () => void
+  /** 'lg' widens the panel for content-heavy dialogs like the help guide. */
+  size?: keyof typeof sizeCls
   children: ReactNode
 }) {
   useEffect(() => {
@@ -20,7 +25,9 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/30 dark:bg-black/50" onClick={onClose} />
-      <div className="relative flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
+      <div
+        className={`relative flex max-h-[85vh] w-full ${sizeCls[size]} flex-col rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900`}
+      >
         <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
           <h2 className="text-sm font-semibold">{title}</h2>
           <button

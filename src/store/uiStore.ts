@@ -16,6 +16,7 @@ type UiStore = {
   /** task id being edited, 'new' for a fresh task, null = editor closed */
   editingTask: string | 'new' | null
   settingsOpen: boolean
+  helpOpen: boolean
   /** Bumped to tell the notes capture box to grab focus. */
   noteFocusToken: number
   /** Bumped to tell the bookmarks page to focus its add-link box. */
@@ -33,6 +34,8 @@ type UiStore = {
   closeTaskEditor: () => void
   openSettings: () => void
   closeSettings: () => void
+  openHelp: () => void
+  closeHelp: () => void
   focusNoteCapture: () => void
   focusBookmarks: () => void
   setNoteDraft: (text: string) => void
@@ -53,6 +56,7 @@ export const useUiStore = create<UiStore>()((set) => ({
   storagePersisted: null,
   editingTask: null,
   settingsOpen: false,
+  helpOpen: false,
   noteFocusToken: 0,
   bookmarkFocusToken: 0,
   noteDraft: '',
@@ -67,6 +71,8 @@ export const useUiStore = create<UiStore>()((set) => ({
   closeTaskEditor: () => set({ editingTask: null }),
   openSettings: () => set({ settingsOpen: true }),
   closeSettings: () => set({ settingsOpen: false }),
+  openHelp: () => set({ helpOpen: true }),
+  closeHelp: () => set({ helpOpen: false }),
   focusNoteCapture: () => set((s) => ({ activeTab: 'notes', noteFocusToken: s.noteFocusToken + 1 })),
   focusBookmarks: () =>
     set((s) => ({ activeTab: 'bookmarks', bookmarkFocusToken: s.bookmarkFocusToken + 1 })),
