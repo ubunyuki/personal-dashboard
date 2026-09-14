@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  ChevronDown,
   Cloud,
   CloudDrizzle,
   CloudFog,
@@ -19,6 +20,9 @@ import { getWeather, isWeatherStale } from '../../lib/weather/weather'
 import type { WeatherNow } from '../../lib/weather/providers'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
+import { WeatherMenu } from './WeatherMenu'
+
+const HKO_HOME = 'https://www.hko.gov.hk/en/index.html'
 
 const icons: Record<ConditionIcon, typeof Cloud> = {
   sun: Sun,
@@ -34,9 +38,12 @@ const icons: Record<ConditionIcon, typeof Cloud> = {
   wind: Wind,
 }
 
+/** Status-bar weather: [place ▾] [icon temp · RH]. The place name opens a
+ *  location dropdown; the readings link to the HKO site for full detail. */
 export function WeatherChip() {
   const weather = useAppStore((s) => s.settings.weather)
-  const openSettings = useUiStore((s) => s.openSettings)
+  const menuOpen = useUiStore((s) => s.weatherMenuOpen)
+  const toggleWeatherMenu = useUiStore((s) => s.toggleWeatherMenu)
   const [state, setState] = useState<WeatherNow | 'error' | null>(null)
 
   useEffect(() => {
@@ -75,7 +82,9 @@ export function WeatherChip() {
   const selectedName = weather.source === 'hko' ? weather.hkoStation : weather.location?.name
   const label =
     selectedName == null
-      ? null
+      ? weather.source === 'open-meteo'
+        ? 'Pick city'
+        : null
       : (weather.labelStyle ?? 'name') === 'code'
         ? shortLabel(selectedName)
         : selectedName
@@ -86,32 +95,45 @@ export function WeatherChip() {
   const title = ok
     ? `${ok.place} · ${ok.label} · ${Math.round(ok.tempC)}°C${
         ok.humidity != null ? ` · ${Math.round(ok.humidity)}% RH` : ''
-      }${updated}`
+      }${updated} — open HKO site`
     : state === 'error'
-      ? 'Weather unavailable — click to configure'
+      ? 'Weather unavailable — click the place name to change location'
       : 'Loading weather…'
 
   return (
-    <button
-      type="button"
-      onClick={openSettings}
-      title={title}
-      className="flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-    >
-      <Icon size={14} strokeWidth={1.75} className={ok ? '' : 'opacity-50'} />
+    <div className="relative flex items-center text-sm text-slate-600 dark:text-slate-300">
       {label && (
-        <span className="hidden min-w-0 items-center sm:flex">
-          <span className="max-w-28 truncate">{label}</span>
-          <span className="ml-1 text-slate-300 dark:text-slate-600">·</span>
-        </span>
+        <button
+          type="button"
+          onClick={toggleWeatherMenu}
+          title="Change location"
+          className="hidden items-center gap-0.5 rounded-md px-1.5 py-1 hover:bg-slate-100 sm:flex dark:hover:bg-slate-800"
+        >
+          <span className="max-w-32 truncate">{label}</span>
+          <ChevronDown size={12} className="shrink-0 text-slate-400 dark:text-slate-500" />
+        </button>
       )}
-      <span className="tabular-nums">{temp != null ? `${temp}°` : '—'}</span>
-      {ok?.humidity != null && (
-        <span className="hidden items-center sm:flex">
-          <span className="mr-1 text-slate-300 dark:text-slate-600">·</span>
-          <span className="tabular-nums">{Math.round(ok.humidity)}%</span>
-        </span>
-      )}
-    </button>
+      <a
+        href={HKO_HOME}
+        target="_blank"
+        rel="noreferrer noopener"
+        title={title}
+        className="flex items-center gap-1 rounded-md px-1.5 py-1 hover:bg-slate-100 dark:hover:bg-slate-800"
+      >
+        <Icon
+          size={16}
+          strokeWidth={1.75}
+          className={`text-slate-500 dark:text-slate-400 ${ok ? '' : 'opacity-50'}`}
+        />
+        <span className="whitespace-nowrap tabular-nums">{temp != null ? `${temp}°` : '—'}</span>
+        {ok?.humidity != null && (
+          <span className="hidden items-center tabular-nums sm:flex">
+            <span className="mx-1 text-slate-300 dark:text-slate-600">·</span>
+            {Math.round(ok.humidity)}%
+          </span>
+        )}
+      </a>
+      {menuOpen && <WeatherMenu />}
+    </div>
   )
 }

@@ -27,6 +27,7 @@ type UiStore = {
   restorePrompt: 'tripwire' | 'import' | null
   bellOpen: boolean
   calendar: { open: boolean; date: string | null }
+  weatherMenuOpen: boolean
   whiteboardOpen: boolean
   setActiveTab: (tab: Tab) => void
   setStoragePersisted: (granted: boolean) => void
@@ -47,6 +48,8 @@ type UiStore = {
   toggleCalendar: () => void
   openCalendar: (date?: string) => void
   closeCalendar: () => void
+  toggleWeatherMenu: () => void
+  closeWeatherMenu: () => void
   openWhiteboard: () => void
   closeWhiteboard: () => void
 }
@@ -64,6 +67,7 @@ export const useUiStore = create<UiStore>()((set) => ({
   restorePrompt: null,
   bellOpen: false,
   calendar: { open: false, date: null },
+  weatherMenuOpen: false,
   whiteboardOpen: false,
   setActiveTab: (tab) => set({ activeTab: tab }),
   setStoragePersisted: (granted) => set({ storagePersisted: granted }),
@@ -80,18 +84,37 @@ export const useUiStore = create<UiStore>()((set) => ({
   setBackupStatus: (status) => set({ backup: status }),
   openRestorePrompt: (kind) => set({ restorePrompt: kind, settingsOpen: false }),
   closeRestorePrompt: () => set({ restorePrompt: null }),
+  // The status-bar popovers (bell, calendar, weather menu) are mutually
+  // exclusive — opening one closes the others.
   toggleBell: () =>
-    set((s) => ({ bellOpen: !s.bellOpen, calendar: { ...s.calendar, open: false } })),
+    set((s) => ({
+      bellOpen: !s.bellOpen,
+      weatherMenuOpen: false,
+      calendar: { ...s.calendar, open: false },
+    })),
   closeBell: () => set({ bellOpen: false }),
   toggleCalendar: () =>
     set((s) =>
       s.calendar.open
         ? { calendar: { ...s.calendar, open: false } }
-        : { calendar: { open: true, date: null }, bellOpen: false },
+        : { calendar: { open: true, date: null }, bellOpen: false, weatherMenuOpen: false },
     ),
-  openCalendar: (date) => set({ calendar: { open: true, date: date ?? null }, bellOpen: false }),
+  openCalendar: (date) =>
+    set({ calendar: { open: true, date: date ?? null }, bellOpen: false, weatherMenuOpen: false }),
   closeCalendar: () => set((s) => ({ calendar: { ...s.calendar, open: false } })),
+  toggleWeatherMenu: () =>
+    set((s) => ({
+      weatherMenuOpen: !s.weatherMenuOpen,
+      bellOpen: false,
+      calendar: { ...s.calendar, open: false },
+    })),
+  closeWeatherMenu: () => set({ weatherMenuOpen: false }),
   openWhiteboard: () =>
-    set((s) => ({ whiteboardOpen: true, bellOpen: false, calendar: { ...s.calendar, open: false } })),
+    set((s) => ({
+      whiteboardOpen: true,
+      bellOpen: false,
+      weatherMenuOpen: false,
+      calendar: { ...s.calendar, open: false },
+    })),
   closeWhiteboard: () => set({ whiteboardOpen: false }),
 }))
