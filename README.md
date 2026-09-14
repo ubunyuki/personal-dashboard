@@ -14,18 +14,21 @@ to a OneDrive folder.
   its own accent colour.
 - **Tasks** — quick add, filters/sorts, editor (status, priority, due
   date+time, project tag), status cycling on rows.
-- **Notes** — instant capture (`Ctrl+Enter`; resizable box, remembered
-  height, drafts survive tab switches), inline edit, convert-to-task
-  (first line → title, rest → description, linked both ways).
-- **Bookmarks** — save links into groups, search across them, favicons,
-  open-in-new-tab; included in backups.
+- **Notes** — instant capture (`Ctrl+Enter`; drag-bar resizable box with
+  remembered height, drafts survive tab switches), inline edit,
+  convert-to-task (first line → title, rest → description, linked both
+  ways).
+- **Bookmarks** — save links into groups (each with its own colour,
+  reorderable), search across them, favicons, open-in-new-tab; included
+  in backups.
 - **Calendar** — click the clock to open a month popover plotting task
   deadlines + manual events, inline event add per day.
 - **Reminders bell** — overdue + due-soon tasks and today's events.
 - **Whiteboard** — Excalidraw, multiple boards, autosave, PNG/SVG download.
-- **Weather** — HKO official readings (station picker) or Open-Meteo city;
-  chip shows location + temperature + humidity, with a full-name or
-  short-code label style.
+- **Weather** — HKO official readings or Open-Meteo city; chip shows
+  location + temperature + humidity (full-name or short-code label).
+  Click the place name to switch location; click the readings for the
+  HKO site.
 - **Help** — in-app user guide (`?` or the help button next to Settings).
 - **Backups** — auto-snapshots to a picked folder (hourly on change, keeps
   newest 30), staleness nudges, manual export/restore, storage-clear tripwire.

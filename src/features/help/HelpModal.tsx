@@ -1,8 +1,15 @@
 import type { ReactNode } from 'react'
+import {
+  Bookmark,
+  CalendarDays,
+  CloudSun,
+  Keyboard,
+  Presentation,
+  Save,
+  StickyNote,
+} from 'lucide-react'
 import { Modal } from '../../components/ui/Modal'
 import { useUiStore } from '../../store/uiStore'
-
-const bodyCls = 'text-sm text-slate-600 dark:text-slate-300'
 
 function Kbd({ children }: { children: ReactNode }) {
   return (
@@ -12,10 +19,23 @@ function Kbd({ children }: { children: ReactNode }) {
   )
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function HelpCard({
+  icon: Icon,
+  title,
+  className = '',
+  children,
+}: {
+  icon: typeof Keyboard
+  title: string
+  className?: string
+  children: ReactNode
+}) {
   return (
-    <section className="flex flex-col gap-1.5">
-      <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+    <section
+      className={`rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-800 dark:bg-slate-800/40 ${className}`}
+    >
+      <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+        <Icon size={14} strokeWidth={1.75} />
         {title}
       </h3>
       {children}
@@ -23,100 +43,127 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
+function Li({ children }: { children: ReactNode }) {
+  return (
+    <li className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+      <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-slate-400 dark:bg-slate-500" />
+      <span>{children}</span>
+    </li>
+  )
+}
+
+function Step({ n, children }: { n: number; children: ReactNode }) {
+  return (
+    <li className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+      <span className="mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+        {n}
+      </span>
+      <span>{children}</span>
+    </li>
+  )
+}
+
 export function HelpModal() {
   const closeHelp = useUiStore((s) => s.closeHelp)
   return (
     <Modal title="Help & user guide" size="lg" onClose={closeHelp}>
-      <div className="flex flex-col gap-5">
-        <Section title="Around the app">
-          <p className={bodyCls}>
-            <strong>Dashboard</strong> shows your task buckets (overdue, due today, due this
-            week, in progress), metric tiles, upcoming events, recent notes and bookmarks — each
-            section carries its own colour. <strong>Tasks</strong>, <strong>Notes</strong> and{' '}
-            <strong>Bookmarks</strong> are the full pages behind those widgets.
-          </p>
-        </Section>
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          The <strong>Dashboard</strong> is the overview — <strong>Tasks</strong>,{' '}
+          <strong>Notes</strong> and <strong>Bookmarks</strong> are the full pages behind its
+          colour-coded widgets.
+        </p>
 
-        <Section title="Keyboard shortcuts">
-          <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5">
+        <HelpCard icon={Keyboard} title="Keyboard shortcuts">
+          <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2 text-sm text-slate-600 sm:grid-cols-[auto_1fr_auto_1fr] dark:text-slate-300">
             <span>
               <Kbd>N</Kbd>
             </span>
-            <span className={bodyCls}>New note — jumps to Notes and focuses the capture box</span>
+            <span>New note</span>
             <span>
               <Kbd>T</Kbd>
             </span>
-            <span className={bodyCls}>New task — opens the task editor</span>
+            <span>New task</span>
             <span>
               <Kbd>B</Kbd>
             </span>
-            <span className={bodyCls}>Bookmarks — jumps there and focuses the add-link box</span>
+            <span>Bookmarks</span>
             <span>
               <Kbd>?</Kbd>
             </span>
-            <span className={bodyCls}>Open this guide</span>
+            <span>This guide</span>
             <span className="flex gap-1">
               <Kbd>Ctrl</Kbd>
               <Kbd>Enter</Kbd>
             </span>
-            <span className={bodyCls}>Save the note you are typing</span>
+            <span>Save the note</span>
             <span>
               <Kbd>Esc</Kbd>
             </span>
-            <span className={bodyCls}>Close any dialog or popover</span>
+            <span>Close dialogs</span>
           </div>
-        </Section>
+        </HelpCard>
 
-        <Section title="Calendar & reminders">
-          <p className={bodyCls}>
-            Click the clock (top right) to open the month calendar: indigo dots are task
-            deadlines, amber dots are events, and you can add an event inline on any day. The
-            bell collects overdue and due-soon tasks plus today's events.
-          </p>
-        </Section>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <HelpCard icon={CalendarDays} title="Calendar & reminders">
+            <ul className="flex flex-col gap-1">
+              <Li>Click the clock to open the month calendar</Li>
+              <Li>Indigo dots = task deadlines · amber = events</Li>
+              <Li>Add an event directly on any day</Li>
+              <Li>The bell gathers overdue, due-soon and today</Li>
+            </ul>
+          </HelpCard>
 
-        <Section title="Notes">
-          <p className={bodyCls}>
-            The capture box saves with <Kbd>Ctrl</Kbd>+<Kbd>Enter</Kbd>. Drag its bottom corner
-            to resize it — the size is remembered — and half-typed drafts survive switching
-            tabs. Any note can become a task: the first line turns into the title, the rest into
-            the description, linked both ways.
-          </p>
-        </Section>
+          <HelpCard icon={StickyNote} title="Notes">
+            <ul className="flex flex-col gap-1">
+              <Li>
+                <Kbd>Ctrl</Kbd>+<Kbd>Enter</Kbd> saves instantly
+              </Li>
+              <Li>Drag the bar under the box to resize it</Li>
+              <Li>Drafts survive switching tabs</Li>
+              <Li>Convert a note to a task — first line becomes the title</Li>
+            </ul>
+          </HelpCard>
 
-        <Section title="Bookmarks">
-          <p className={bodyCls}>
-            Save links into groups and search across all of them. Deleting a group keeps its
-            links (they move to Ungrouped). Links open in a new tab; site icons come from the
-            network, so offline you'll see a globe instead.
-          </p>
-        </Section>
+          <HelpCard icon={Bookmark} title="Bookmarks">
+            <ul className="flex flex-col gap-1">
+              <Li>Group your links; pick each group's colour (pencil icon)</Li>
+              <Li>Reorder groups with the arrows; search covers everything</Li>
+              <Li>Deleting a group keeps its links — they move to Ungrouped</Li>
+              <Li>Site icons need network; offline shows a globe</Li>
+            </ul>
+          </HelpCard>
 
-        <Section title="Weather">
-          <p className={bodyCls}>
-            The chip shows your chosen place, temperature and humidity. In Settings you pick the
-            source (an HKO station, or any city via Open-Meteo), the unit, and whether the label
-            is the full name or a short code like “ST” — clicking the chip takes you there. If
-            HKO is blocked on a work network, switch the source to Open-Meteo.
-          </p>
-        </Section>
+          <HelpCard icon={CloudSun} title="Weather">
+            <ul className="flex flex-col gap-1">
+              <Li>Click the place name to switch station or city</Li>
+              <Li>Click the readings to open the HKO site</Li>
+              <Li>Full-name or short-code label — set in Settings</Li>
+              <Li>HKO blocked at work? Switch the source to Open-Meteo</Li>
+            </ul>
+          </HelpCard>
+        </div>
 
-        <Section title="Whiteboard">
-          <p className={bodyCls}>
-            The presentation button opens Excalidraw. Boards autosave locally; use the board
-            header to rename or switch boards and to export PNG/SVG.
-          </p>
-        </Section>
+        <HelpCard icon={Presentation} title="Whiteboard">
+          <ul className="flex flex-col gap-1">
+            <Li>Opens from the projector button in the status bar; boards autosave locally</Li>
+            <Li>Rename or switch boards and export PNG/SVG from the board header</Li>
+          </ul>
+        </HelpCard>
 
-        <Section title="Backups & restore">
-          <p className={bodyCls}>
-            Data lives only in this browser, so pick a backup folder (ideally inside OneDrive)
-            in Settings — the app then writes a snapshot every hour something changed, keeping
-            the newest 30, and nudges you when backups go stale. You can also export a file
-            manually. To restore, use Settings or the prompt the app shows if browser storage
-            was ever cleared; old backup files from before bookmarks existed restore fine.
-          </p>
-        </Section>
+        <HelpCard icon={Save} title="Backups & restore">
+          <ol className="flex flex-col gap-1.5">
+            <Step n={1}>Settings → Backups → choose a folder inside OneDrive.</Step>
+            <Step n={2}>
+              The app snapshots hourly whenever something changed (newest 30 kept) — you can also
+              export a file any time.
+            </Step>
+            <Step n={3}>
+              Restore from Settings, or from the automatic prompt if browser storage is ever
+              cleared. Old backup files restore fine.
+            </Step>
+          </ol>
+        </HelpCard>
       </div>
     </Modal>
   )
