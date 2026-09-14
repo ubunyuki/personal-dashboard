@@ -58,6 +58,23 @@ export type AppStore = PersistedAppData & {
   updateSettings: (patch: SettingsPatch) => void
 }
 
+/**
+ * The persisted slice of the store — the ONE definition of what hits
+ * localStorage (persist's partialize) AND what backup envelopes contain
+ * (buildFullEnvelope). persistedSlice.test.ts asserts it stays in sync
+ * with defaultAppData(), so a new PersistedAppData field can't be missed.
+ */
+export const persistedSlice = (s: AppStore): PersistedAppData => ({
+  tasks: s.tasks,
+  notes: s.notes,
+  events: s.events,
+  boards: s.boards,
+  bookmarks: s.bookmarks,
+  bookmarkGroups: s.bookmarkGroups,
+  settings: s.settings,
+  lastChangeAt: s.lastChangeAt,
+})
+
 /** Keep completedAt in sync with status transitions unless the patch sets it explicitly. */
 function withCompletion(prev: Task, patch: Partial<Task>): Partial<Task> {
   if (!patch.status || patch.status === prev.status) return patch
@@ -305,16 +322,7 @@ export const useAppStore = create<AppStore>()(
       name: 'pwd:app',
       version: SCHEMA_VERSION,
       storage: createJSONStorage(() => localStorage),
-      partialize: (s): PersistedAppData => ({
-        tasks: s.tasks,
-        notes: s.notes,
-        events: s.events,
-        boards: s.boards,
-        bookmarks: s.bookmarks,
-        bookmarkGroups: s.bookmarkGroups,
-        settings: s.settings,
-        lastChangeAt: s.lastChangeAt,
-      }),
+      partialize: persistedSlice,
       migrate: (persisted, version) => runMigrations(persisted, version),
     },
   ),

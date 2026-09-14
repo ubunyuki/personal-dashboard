@@ -15,6 +15,22 @@ export function buildEnvelope(
 }
 
 /**
+ * Collections an envelope WRITTEN at `version` must contain. Deliberately a
+ * subset of today's defaultAppData() arrays: a collection added without a
+ * schema bump (e.g. optional metadata side-cars) must NOT be listed for the
+ * version it appeared in, or older backups at that same version would stop
+ * validating. persistedSlice.test.ts guards both properties (subset of
+ * defaults; never shrinks across versions).
+ */
+export function requiredArraysFor(version: number): readonly (keyof PersistedAppData)[] {
+  // Collections added by later schema versions are only required of envelopes
+  // written at those versions — older backup files must stay restorable.
+  return version >= 3
+    ? (['tasks', 'notes', 'events', 'boards', 'bookmarks', 'bookmarkGroups'] as const)
+    : (['tasks', 'notes', 'events', 'boards'] as const)
+}
+
+/**
  * Structural validation of an untrusted parsed JSON value. Field-level
  * sanitizing beyond this is runMigrations' job (defaults spread underneath).
  * NOTE: checks assume the v1 field names; if a future migration renames
@@ -37,13 +53,7 @@ export function validateEnvelope(raw: unknown): BackupEnvelope {
     throw new Error('Backup has no appData section.')
   }
   const appData = env.appData as Record<string, unknown>
-  // Collections added by later schema versions are only required of envelopes
-  // written at those versions — older backup files must stay restorable.
-  const requiredArrays =
-    env.version >= 3
-      ? (['tasks', 'notes', 'events', 'boards', 'bookmarks', 'bookmarkGroups'] as const)
-      : (['tasks', 'notes', 'events', 'boards'] as const)
-  for (const key of requiredArrays) {
+  for (const key of requiredArraysFor(env.version)) {
     if (!Array.isArray(appData[key])) {
       throw new Error(`Backup field appData.${key} is missing or not a list.`)
     }

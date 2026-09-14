@@ -36,7 +36,26 @@ export default defineConfig({
     __BUILD_ID__: JSON.stringify((process.env.COMMIT_REF ?? 'dev').slice(0, 7)),
   },
   test: {
-    environment: 'node',
     passWithNoTests: true,
+    // Two projects split by extension: pure logic stays fast in node; only
+    // component tests (.tsx) pay for jsdom. `extends: true` is load-bearing —
+    // rendering <App /> needs the root `define` (__BUILD_ID__) and the
+    // VitePWA plugin (it supplies the virtual:pwa-register/react module).
+    projects: [
+      {
+        extends: true,
+        test: { name: 'unit', environment: 'node', include: ['src/**/*.test.ts'] },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'dom',
+          environment: 'jsdom',
+          include: ['src/**/*.test.tsx'],
+          setupFiles: ['./src/test/setup.ts'],
+          restoreMocks: true,
+        },
+      },
+    ],
   },
 })

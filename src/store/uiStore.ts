@@ -9,7 +9,7 @@ export interface BackupStatus {
   lastBackupAt: string | null
 }
 
-type UiStore = {
+type UiState = {
   activeTab: Tab
   /** null = check still running */
   storagePersisted: boolean | null
@@ -29,6 +29,9 @@ type UiStore = {
   calendar: { open: boolean; date: string | null }
   weatherMenuOpen: boolean
   whiteboardOpen: boolean
+}
+
+type UiStore = UiState & {
   setActiveTab: (tab: Tab) => void
   setStoragePersisted: (granted: boolean) => void
   openTaskEditor: (id?: string) => void
@@ -54,7 +57,8 @@ type UiStore = {
   closeWhiteboard: () => void
 }
 
-export const useUiStore = create<UiStore>()((set) => ({
+/** Initial UI state — exported so tests can reset the store between cases. */
+export const initialUiState = (): UiState => ({
   activeTab: 'dashboard',
   storagePersisted: null,
   editingTask: null,
@@ -69,6 +73,10 @@ export const useUiStore = create<UiStore>()((set) => ({
   calendar: { open: false, date: null },
   weatherMenuOpen: false,
   whiteboardOpen: false,
+})
+
+export const useUiStore = create<UiStore>()((set) => ({
+  ...initialUiState(),
   setActiveTab: (tab) => set({ activeTab: tab }),
   setStoragePersisted: (granted) => set({ storagePersisted: granted }),
   openTaskEditor: (id) => set({ editingTask: id ?? 'new' }),

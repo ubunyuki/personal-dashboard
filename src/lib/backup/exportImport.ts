@@ -1,5 +1,5 @@
-import { type BackupEnvelope, type PersistedAppData, type StoredScene } from '../../types'
-import { useAppStore } from '../../store/appStore'
+import { type BackupEnvelope, type StoredScene } from '../../types'
+import { persistedSlice, useAppStore } from '../../store/appStore'
 import { loadScene, saveScene } from '../storage/idb'
 import { nowIso } from '../id'
 import { buildEnvelope, applyEnvelope, validateEnvelope } from './envelope'
@@ -10,16 +10,8 @@ const emptyScene = (): StoredScene => ({ elements: [], appState: {}, files: {} }
 
 export async function buildFullEnvelope(): Promise<BackupEnvelope> {
   const s = useAppStore.getState()
-  const appData: PersistedAppData = {
-    tasks: s.tasks,
-    notes: s.notes,
-    events: s.events,
-    boards: s.boards,
-    bookmarks: s.bookmarks,
-    bookmarkGroups: s.bookmarkGroups,
-    settings: s.settings,
-    lastChangeAt: s.lastChangeAt,
-  }
+  // Same slice persist writes to localStorage — one definition, no drift.
+  const appData = persistedSlice(s)
   const boards = await Promise.all(
     s.boards.map(async (b) => ({
       id: b.id,
