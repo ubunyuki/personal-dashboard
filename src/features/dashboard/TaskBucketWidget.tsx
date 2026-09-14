@@ -1,4 +1,5 @@
 import type { Task } from '../../types'
+import { Card } from '../../components/ui/Card'
 import { useUiStore } from '../../store/uiStore'
 import { TaskRow } from '../tasks/TaskRow'
 
@@ -15,15 +16,7 @@ export function TaskBucketWidget({
 }) {
   const setActiveTab = useUiStore((s) => s.setActiveTab)
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-      <header className="mb-1 flex items-baseline justify-between">
-        <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-          {title}
-        </h3>
-        <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500">
-          {tasks.length}
-        </span>
-      </header>
+    <Card accent="tasks" title={title} right={tasks.length}>
       {tasks.length === 0 ? (
         <p className="py-2 text-sm text-slate-400 dark:text-slate-500">{emptyText}</p>
       ) : (
@@ -42,6 +35,6 @@ export function TaskBucketWidget({
           )}
         </div>
       )}
-    </section>
+    </Card>
   )
 }

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { format, parseISO } from 'date-fns'
+import { Card } from '../../components/ui/Card'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 
@@ -11,15 +12,7 @@ export function RecentNotes() {
     [notes],
   )
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-      <header className="mb-1 flex items-baseline justify-between">
-        <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-          Recent notes
-        </h3>
-        <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500">
-          {notes.length}
-        </span>
-      </header>
+    <Card accent="notes" title="Recent notes" right={notes.length}>
       {recent.length === 0 ? (
         <p className="py-2 text-sm text-slate-400 dark:text-slate-500">
           Nothing captured yet — use the pen button up top.
@@ -31,7 +24,7 @@ export function RecentNotes() {
               key={n.id}
               type="button"
               onClick={() => setActiveTab('notes')}
-              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30"
             >
               <span className="min-w-0 flex-1 truncate text-sm">{n.text.split('\n')[0]}</span>
               <span className="shrink-0 text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
@@ -41,6 +34,6 @@ export function RecentNotes() {
           ))}
         </div>
       )}
-    </section>
+    </Card>
   )
 }

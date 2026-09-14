@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { addDays, format } from 'date-fns'
+import { Card } from '../../components/ui/Card'
 import { parseLocalDate, toLocalDate } from '../../lib/dates/dates'
 import { useNow } from '../../lib/useNow'
 import { useAppStore } from '../../store/appStore'
@@ -25,15 +26,7 @@ export function UpcomingEvents() {
     d === today ? 'Today' : d === tomorrow ? 'Tomorrow' : format(parseLocalDate(d), 'EEE d MMM')
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-      <header className="mb-1 flex items-baseline justify-between">
-        <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-          Upcoming events
-        </h3>
-        <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500">
-          {upcoming.length}
-        </span>
-      </header>
+    <Card accent="calendar" title="Upcoming events" right={upcoming.length}>
       {upcoming.length === 0 ? (
         <p className="py-2 text-sm text-slate-400 dark:text-slate-500">
           No events in the next 7 days — add one from the calendar.
@@ -45,7 +38,7 @@ export function UpcomingEvents() {
               key={e.id}
               type="button"
               onClick={() => openCalendar(e.date)}
-              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-amber-100/60 dark:hover:bg-amber-900/30"
             >
               <span className="w-20 shrink-0 text-xs font-medium text-slate-500 dark:text-slate-400">
                 {dayLabel(e.date)}
@@ -58,6 +51,6 @@ export function UpcomingEvents() {
           ))}
         </div>
       )}
-    </section>
+    </Card>
   )
 }

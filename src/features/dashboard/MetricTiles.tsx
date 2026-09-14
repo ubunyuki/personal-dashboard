@@ -1,8 +1,9 @@
 import type { Metrics } from '../../store/selectors'
+import { Card } from '../../components/ui/Card'
 
 function Tile({ label, value, alert }: { label: string; value: number; alert?: boolean }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+    <Card accent="neutral">
       <p
         className={`text-2xl font-semibold tabular-nums ${
           alert && value > 0 ? 'text-red-600 dark:text-red-400' : ''
@@ -11,7 +12,7 @@ function Tile({ label, value, alert }: { label: string; value: number; alert?: b
         {value}
       </p>
       <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
-    </div>
+    </Card>
   )
 }
 
