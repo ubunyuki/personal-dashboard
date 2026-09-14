@@ -52,9 +52,14 @@ export interface BoardMeta {
   updatedAt: string
 }
 
+/** Tint choices for bookmark group cards. */
+export type GroupColor = 'sky' | 'indigo' | 'emerald' | 'amber' | 'rose' | 'violet'
+
 export interface BookmarkGroup {
   id: string
   name: string
+  /** Card tint on the Bookmarks page; undefined = 'sky'. */
+  color?: GroupColor
   createdAt: string
   updatedAt: string
 }

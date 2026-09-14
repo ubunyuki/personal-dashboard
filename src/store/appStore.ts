@@ -48,7 +48,9 @@ export type AppStore = PersistedAppData & {
   updateBookmark: (id: string, patch: Partial<Pick<Bookmark, 'title' | 'url' | 'groupId'>>) => void
   deleteBookmark: (id: string) => void
   addBookmarkGroup: (name: string) => BookmarkGroup
-  renameBookmarkGroup: (id: string, name: string) => void
+  updateBookmarkGroup: (id: string, patch: Partial<Pick<BookmarkGroup, 'name' | 'color'>>) => void
+  /** Swap the group with its neighbour (delta -1 = up, +1 = down). */
+  moveBookmarkGroup: (id: string, delta: -1 | 1) => void
   /** Deleting a group moves its bookmarks to Ungrouped. */
   deleteBookmarkGroup: (id: string) => void
   /** Restore path: replaces all persisted data via merge-set (replace-mode would strip actions). */
@@ -252,13 +254,30 @@ export const useAppStore = create<AppStore>()(
         return group
       },
 
-      renameBookmarkGroup: (id, name) =>
+      updateBookmarkGroup: (id, patch) =>
         set((s) => ({
           bookmarkGroups: s.bookmarkGroups.map((g) =>
-            g.id === id ? { ...g, name: name.trim() || g.name, updatedAt: nowIso() } : g,
+            g.id === id
+              ? {
+                  ...g,
+                  ...patch,
+                  name: patch.name !== undefined ? patch.name.trim() || g.name : g.name,
+                  updatedAt: nowIso(),
+                }
+              : g,
           ),
           lastChangeAt: nowIso(),
         })),
+
+      moveBookmarkGroup: (id, delta) =>
+        set((s) => {
+          const i = s.bookmarkGroups.findIndex((g) => g.id === id)
+          const j = i + delta
+          if (i < 0 || j < 0 || j >= s.bookmarkGroups.length) return {}
+          const next = [...s.bookmarkGroups]
+          ;[next[i], next[j]] = [next[j], next[i]]
+          return { bookmarkGroups: next, lastChangeAt: nowIso() }
+        }),
 
       deleteBookmarkGroup: (id) =>
         set((s) => ({

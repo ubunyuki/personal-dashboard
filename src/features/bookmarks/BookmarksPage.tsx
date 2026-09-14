@@ -1,22 +1,43 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Check, FolderPlus, Pencil, Search, Trash2, X } from 'lucide-react'
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  FolderPlus,
+  Pencil,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { Button } from '../../components/ui/Button'
-import { Card } from '../../components/ui/Card'
+import { Card, cardTitleCls } from '../../components/ui/Card'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { inputCls } from '../../components/ui/Field'
 import { domainOf } from '../../lib/bookmarks/url'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
-import type { Bookmark, BookmarkGroup } from '../../types'
+import type { Bookmark, BookmarkGroup, GroupColor } from '../../types'
 import { Favicon } from './Favicon'
 
 /** <select> value for "no group". */
 const UNGROUPED = ''
 
-const iconBtn =
-  'rounded p-1 text-slate-400 hover:bg-sky-200/50 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-sky-900/40 dark:hover:text-slate-300'
+const GROUP_COLORS: GroupColor[] = ['sky', 'indigo', 'emerald', 'amber', 'rose', 'violet']
 
-const groupTitleCls = 'text-xs font-semibold tracking-wide text-sky-700 uppercase dark:text-sky-300'
+const swatchCls: Record<GroupColor, string> = {
+  sky: 'bg-sky-400',
+  indigo: 'bg-indigo-400',
+  emerald: 'bg-emerald-400',
+  amber: 'bg-amber-400',
+  rose: 'bg-rose-400',
+  violet: 'bg-violet-400',
+}
+
+// Neutral hovers so rows and buttons read well on every group tint.
+const iconBtn =
+  'rounded p-1 text-slate-400 hover:bg-black/5 hover:text-slate-600 disabled:pointer-events-none disabled:opacity-30 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-300'
+
+const titleBase = 'text-xs font-semibold tracking-wide uppercase'
 
 export function BookmarksPage() {
   const bookmarks = useAppStore((s) => s.bookmarks)
@@ -174,15 +195,23 @@ export function BookmarksPage() {
               No bookmarks match “{search.trim()}”.
             </p>
           )}
-          {groups.map((g) => {
+          {groups.map((g, i) => {
             const items = byGroup.get(g.id) ?? []
             if (q && items.length === 0) return null
-            return <GroupSection key={g.id} group={g} items={items} />
+            return (
+              <GroupSection
+                key={g.id}
+                group={g}
+                items={items}
+                first={i === 0}
+                last={i === groups.length - 1}
+              />
+            )
           })}
           {ungrouped.length > 0 && (
             <Card accent="bookmarks">
               <header className="mb-1 flex items-baseline justify-between">
-                <h3 className={groupTitleCls}>Ungrouped</h3>
+                <h3 className={`${titleBase} ${cardTitleCls.bookmarks}`}>Ungrouped</h3>
                 <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500">
                   {ungrouped.length}
                 </span>
@@ -200,26 +229,39 @@ export function BookmarksPage() {
   )
 }
 
-function GroupSection({ group, items }: { group: BookmarkGroup; items: Bookmark[] }) {
-  const renameBookmarkGroup = useAppStore((s) => s.renameBookmarkGroup)
+function GroupSection({
+  group,
+  items,
+  first,
+  last,
+}: {
+  group: BookmarkGroup
+  items: Bookmark[]
+  first: boolean
+  last: boolean
+}) {
+  const updateBookmarkGroup = useAppStore((s) => s.updateBookmarkGroup)
   const deleteBookmarkGroup = useAppStore((s) => s.deleteBookmarkGroup)
+  const moveBookmarkGroup = useAppStore((s) => s.moveBookmarkGroup)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
+
+  const color = group.color ?? 'sky'
 
   const startEdit = () => {
     setDraft(group.name)
     setEditing(true)
   }
   const commit = () => {
-    renameBookmarkGroup(group.id, draft)
+    updateBookmarkGroup(group.id, { name: draft })
     setEditing(false)
   }
 
   return (
-    <Card accent="bookmarks">
-      <header className="mb-1 flex items-center justify-between gap-2">
-        {editing ? (
-          <span className="flex flex-1 items-center gap-1">
+    <Card accent={color}>
+      {editing ? (
+        <div className="mb-1 flex flex-col gap-2">
+          <span className="flex items-center gap-1">
             <input
               className={`${inputCls} max-w-56 py-0.5 text-xs`}
               value={draft}
@@ -236,32 +278,73 @@ function GroupSection({ group, items }: { group: BookmarkGroup; items: Bookmark[
             <button type="button" title="Save name" className={iconBtn} onClick={commit}>
               <Check size={14} />
             </button>
-            <button type="button" title="Cancel" className={iconBtn} onClick={() => setEditing(false)}>
+            <button
+              type="button"
+              title="Done"
+              className={iconBtn}
+              onClick={() => setEditing(false)}
+            >
               <X size={14} />
             </button>
           </span>
-        ) : (
-          <>
-            <h3 className={groupTitleCls}>{group.name}</h3>
-            <span className="flex items-center gap-0.5">
-              <span className="mr-1 text-xs tabular-nums text-slate-400 dark:text-slate-500">
-                {items.length}
-              </span>
-              <button type="button" title="Rename group" className={iconBtn} onClick={startEdit}>
-                <Pencil size={13} />
-              </button>
+          <span className="flex items-center gap-1.5 px-0.5">
+            {GROUP_COLORS.map((c) => (
               <button
+                key={c}
                 type="button"
-                title="Delete group (its bookmarks move to Ungrouped)"
-                className={`${iconBtn} hover:text-red-600 dark:hover:text-red-400`}
-                onClick={() => deleteBookmarkGroup(group.id)}
-              >
-                <Trash2 size={13} />
-              </button>
+                title={c}
+                onClick={() => updateBookmarkGroup(group.id, { color: c })}
+                className={`h-4 w-4 rounded-full transition-transform hover:scale-110 ${swatchCls[c]} ${
+                  color === c ? 'ring-2 ring-slate-600 dark:ring-white' : ''
+                }`}
+              />
+            ))}
+          </span>
+        </div>
+      ) : (
+        <header className="mb-1 flex items-center justify-between gap-2">
+          <h3 className={`${titleBase} ${cardTitleCls[color]}`}>{group.name}</h3>
+          <span className="flex items-center gap-0.5">
+            <span className="mr-1 text-xs tabular-nums text-slate-400 dark:text-slate-500">
+              {items.length}
             </span>
-          </>
-        )}
-      </header>
+            <button
+              type="button"
+              title="Move group up"
+              className={iconBtn}
+              disabled={first}
+              onClick={() => moveBookmarkGroup(group.id, -1)}
+            >
+              <ChevronUp size={13} />
+            </button>
+            <button
+              type="button"
+              title="Move group down"
+              className={iconBtn}
+              disabled={last}
+              onClick={() => moveBookmarkGroup(group.id, 1)}
+            >
+              <ChevronDown size={13} />
+            </button>
+            <button
+              type="button"
+              title="Rename group / pick colour"
+              className={iconBtn}
+              onClick={startEdit}
+            >
+              <Pencil size={13} />
+            </button>
+            <button
+              type="button"
+              title="Delete group (its bookmarks move to Ungrouped)"
+              className={`${iconBtn} hover:text-red-600 dark:hover:text-red-400`}
+              onClick={() => deleteBookmarkGroup(group.id)}
+            >
+              <Trash2 size={13} />
+            </button>
+          </span>
+        </header>
+      )}
       {items.length === 0 ? (
         <p className="py-1.5 text-sm text-slate-400 dark:text-slate-500">
           No bookmarks in this group yet.
@@ -344,7 +427,7 @@ function BookmarkRow({ bookmark }: { bookmark: Bookmark }) {
   }
 
   return (
-    <div className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-sky-100/60 dark:hover:bg-sky-900/30">
+    <div className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-black/5 dark:hover:bg-white/5">
       <Favicon url={bookmark.url} />
       <a
         href={bookmark.url}
