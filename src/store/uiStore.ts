@@ -20,6 +20,8 @@ type UiStore = {
   noteFocusToken: number
   /** Bumped to tell the bookmarks page to focus its add-link box. */
   bookmarkFocusToken: number
+  /** Unsaved capture-box draft; survives tab switches (not reloads). */
+  noteDraft: string
   backup: BackupStatus
   restorePrompt: 'tripwire' | 'import' | null
   bellOpen: boolean
@@ -33,6 +35,7 @@ type UiStore = {
   closeSettings: () => void
   focusNoteCapture: () => void
   focusBookmarks: () => void
+  setNoteDraft: (text: string) => void
   setBackupStatus: (status: BackupStatus) => void
   openRestorePrompt: (kind: 'tripwire' | 'import') => void
   closeRestorePrompt: () => void
@@ -52,6 +55,7 @@ export const useUiStore = create<UiStore>()((set) => ({
   settingsOpen: false,
   noteFocusToken: 0,
   bookmarkFocusToken: 0,
+  noteDraft: '',
   backup: { mode: 'unconfigured', lastBackupAt: null },
   restorePrompt: null,
   bellOpen: false,
@@ -66,6 +70,7 @@ export const useUiStore = create<UiStore>()((set) => ({
   focusNoteCapture: () => set((s) => ({ activeTab: 'notes', noteFocusToken: s.noteFocusToken + 1 })),
   focusBookmarks: () =>
     set((s) => ({ activeTab: 'bookmarks', bookmarkFocusToken: s.bookmarkFocusToken + 1 })),
+  setNoteDraft: (text) => set({ noteDraft: text }),
   setBackupStatus: (status) => set({ backup: status }),
   openRestorePrompt: (kind) => set({ restorePrompt: kind, settingsOpen: false }),
   closeRestorePrompt: () => set({ restorePrompt: null }),
