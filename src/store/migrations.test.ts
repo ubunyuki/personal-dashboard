@@ -11,6 +11,12 @@ describe('runMigrations', () => {
     expect(out.lastChangeAt).toBeNull()
   })
 
+  it('backfills the bookmark collections when migrating v2 data', () => {
+    const out = runMigrations({ tasks: [], settings: defaultSettings() }, 2)
+    expect(out.bookmarks).toEqual([])
+    expect(out.bookmarkGroups).toEqual([])
+  })
+
   it('returns complete data for empty input', () => {
     expect(runMigrations({}, 1)).toEqual(defaultAppData())
   })

@@ -5,7 +5,7 @@
  * - date: LOCAL calendar string 'yyyy-MM-dd'; time: 'HH:mm' (24h).
  *   Parse with date-fns, never `new Date('yyyy-MM-dd')` (that is UTC midnight).
  */
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 
 export type TaskStatus = 'todo' | 'in-progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
@@ -52,6 +52,23 @@ export interface BoardMeta {
   updatedAt: string
 }
 
+export interface BookmarkGroup {
+  id: string
+  name: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Bookmark {
+  id: string
+  title: string
+  url: string
+  /** undefined = ungrouped */
+  groupId?: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface WeatherLocation {
   name: string
   admin1?: string
@@ -83,6 +100,8 @@ export interface PersistedAppData {
   notes: Note[]
   events: CalEvent[]
   boards: BoardMeta[]
+  bookmarks: Bookmark[]
+  bookmarkGroups: BookmarkGroup[]
   settings: Settings
   /** Bumped only by data mutations, never by backup bookkeeping. */
   lastChangeAt: string | null

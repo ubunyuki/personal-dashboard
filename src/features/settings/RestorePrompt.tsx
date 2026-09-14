@@ -96,7 +96,7 @@ export function RestorePrompt() {
           </p>
           <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm tabular-nums dark:bg-slate-800">
             Tasks: {summary.tasks} · Notes: {summary.notes} · Events: {summary.events} · Boards:{' '}
-            {summary.boards}
+            {summary.boards} · Bookmarks: {summary.bookmarks}
           </p>
           <p className="text-sm text-red-600 dark:text-red-400">
             Restoring replaces everything currently in the app.

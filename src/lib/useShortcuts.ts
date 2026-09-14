@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { useUiStore } from '../store/uiStore'
 
-/** Global shortcuts: N = new note, T = new task. Inactive while typing or
- *  while any overlay (editor, settings, whiteboard, restore) is open. */
+/** Global shortcuts: N = new note, T = new task, B = bookmarks. Inactive while
+ *  typing or while any overlay (editor, settings, whiteboard, restore) is open. */
 export function useShortcuts(): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -18,6 +18,9 @@ export function useShortcuts(): void {
       } else if (e.key === 't' || e.key === 'T') {
         e.preventDefault()
         ui.openTaskEditor()
+      } else if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault()
+        ui.focusBookmarks()
       }
     }
     window.addEventListener('keydown', onKey)

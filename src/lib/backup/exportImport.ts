@@ -15,6 +15,8 @@ export async function buildFullEnvelope(): Promise<BackupEnvelope> {
     notes: s.notes,
     events: s.events,
     boards: s.boards,
+    bookmarks: s.bookmarks,
+    bookmarkGroups: s.bookmarkGroups,
     settings: s.settings,
     lastChangeAt: s.lastChangeAt,
   }

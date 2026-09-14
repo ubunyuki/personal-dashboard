@@ -4,6 +4,7 @@ import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 import { metrics, taskBuckets } from '../../store/selectors'
 import { MetricTiles } from './MetricTiles'
+import { RecentBookmarks } from './RecentBookmarks'
 import { RecentNotes } from './RecentNotes'
 import { TaskBucketWidget } from './TaskBucketWidget'
 import { UpcomingEvents } from './UpcomingEvents'
@@ -36,6 +37,7 @@ export function DashboardPage() {
       <div className="grid gap-3 md:grid-cols-2">
         <UpcomingEvents />
         <RecentNotes />
+        <RecentBookmarks />
       </div>
     </div>
   )

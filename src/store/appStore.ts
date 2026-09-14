@@ -3,6 +3,8 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import {
   SCHEMA_VERSION,
   type BoardMeta,
+  type Bookmark,
+  type BookmarkGroup,
   type CalEvent,
   type Note,
   type PersistedAppData,
@@ -11,6 +13,7 @@ import {
   type WeatherSettings,
 } from '../types'
 import { newId, nowIso } from '../lib/id'
+import { domainOf, normalizeUrl } from '../lib/bookmarks/url'
 import { splitNoteForTask } from '../lib/notes/splitNoteForTask'
 import { defaultAppData, runMigrations } from './migrations'
 
@@ -18,6 +21,8 @@ export type TaskInput = Pick<Task, 'title'> &
   Partial<Omit<Task, 'id' | 'title' | 'createdAt' | 'updatedAt'>>
 
 export type EventInput = Pick<CalEvent, 'title' | 'date'> & Partial<Pick<CalEvent, 'time'>>
+
+export type BookmarkInput = { title: string; url: string; groupId?: string }
 
 /** Settings patch where the nested weather object may itself be partial. */
 export type SettingsPatch = Partial<Omit<Settings, 'weather'>> & { weather?: Partial<WeatherSettings> }
@@ -39,6 +44,13 @@ export type AppStore = PersistedAppData & {
   deleteBoard: (id: string) => void
   /** Bumped by whiteboard autosave so backups notice board edits. */
   touchBoard: (id: string) => void
+  addBookmark: (input: BookmarkInput) => Bookmark
+  updateBookmark: (id: string, patch: Partial<Pick<Bookmark, 'title' | 'url' | 'groupId'>>) => void
+  deleteBookmark: (id: string) => void
+  addBookmarkGroup: (name: string) => BookmarkGroup
+  renameBookmarkGroup: (id: string, name: string) => void
+  /** Deleting a group moves its bookmarks to Ungrouped. */
+  deleteBookmarkGroup: (id: string) => void
   /** Restore path: replaces all persisted data via merge-set (replace-mode would strip actions). */
   replaceAll: (data: PersistedAppData) => void
   updateSettings: (patch: SettingsPatch) => void
@@ -192,6 +204,72 @@ export const useAppStore = create<AppStore>()(
           lastChangeAt: nowIso(),
         })),
 
+      addBookmark: (input) => {
+        const now = nowIso()
+        const url = normalizeUrl(input.url)
+        const bookmark: Bookmark = {
+          id: newId(),
+          title: input.title.trim() || domainOf(url) || url,
+          url,
+          groupId: input.groupId,
+          createdAt: now,
+          updatedAt: now,
+        }
+        set((s) => ({ bookmarks: [bookmark, ...s.bookmarks], lastChangeAt: now }))
+        return bookmark
+      },
+
+      updateBookmark: (id, patch) =>
+        set((s) => ({
+          bookmarks: s.bookmarks.map((b) =>
+            b.id === id
+              ? {
+                  ...b,
+                  ...patch,
+                  ...(patch.url !== undefined ? { url: normalizeUrl(patch.url) } : {}),
+                  updatedAt: nowIso(),
+                }
+              : b,
+          ),
+          lastChangeAt: nowIso(),
+        })),
+
+      deleteBookmark: (id) =>
+        set((s) => ({
+          bookmarks: s.bookmarks.filter((b) => b.id !== id),
+          lastChangeAt: nowIso(),
+        })),
+
+      addBookmarkGroup: (name) => {
+        const now = nowIso()
+        const group: BookmarkGroup = {
+          id: newId(),
+          name: name.trim() || 'Untitled group',
+          createdAt: now,
+          updatedAt: now,
+        }
+        set((s) => ({ bookmarkGroups: [...s.bookmarkGroups, group], lastChangeAt: now }))
+        return group
+      },
+
+      renameBookmarkGroup: (id, name) =>
+        set((s) => ({
+          bookmarkGroups: s.bookmarkGroups.map((g) =>
+            g.id === id ? { ...g, name: name.trim() || g.name, updatedAt: nowIso() } : g,
+          ),
+          lastChangeAt: nowIso(),
+        })),
+
+      deleteBookmarkGroup: (id) =>
+        set((s) => ({
+          bookmarkGroups: s.bookmarkGroups.filter((g) => g.id !== id),
+          // Members keep living, just ungrouped.
+          bookmarks: s.bookmarks.map((b) =>
+            b.groupId === id ? { ...b, groupId: undefined } : b,
+          ),
+          lastChangeAt: nowIso(),
+        })),
+
       replaceAll: (data) => set({ ...data }),
 
       updateSettings: (patch) =>
@@ -213,6 +291,8 @@ export const useAppStore = create<AppStore>()(
         notes: s.notes,
         events: s.events,
         boards: s.boards,
+        bookmarks: s.bookmarks,
+        bookmarkGroups: s.bookmarkGroups,
         settings: s.settings,
         lastChangeAt: s.lastChangeAt,
       }),

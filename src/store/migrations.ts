@@ -14,6 +14,8 @@ export function defaultAppData(): PersistedAppData {
     notes: [],
     events: [],
     boards: [],
+    bookmarks: [],
+    bookmarkGroups: [],
     settings: defaultSettings(),
     lastChangeAt: null,
   }
@@ -23,6 +25,8 @@ export function defaultAppData(): PersistedAppData {
 const steps: Record<number, (d: Partial<PersistedAppData>) => Partial<PersistedAppData>> = {
   // v1 → v2: settings.weather gained source + hkoStation; the defaults spread fills them.
   1: (d) => d,
+  // v2 → v3: bookmarks + bookmarkGroups collections added; the defaults spread fills them.
+  2: (d) => d,
 }
 
 /**

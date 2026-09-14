@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type Tab = 'dashboard' | 'tasks' | 'notes'
+export type Tab = 'dashboard' | 'tasks' | 'notes' | 'bookmarks'
 
 export type BackupMode = 'unconfigured' | 'auto' | 'permission-needed' | 'blocked' | 'error'
 
@@ -18,6 +18,8 @@ type UiStore = {
   settingsOpen: boolean
   /** Bumped to tell the notes capture box to grab focus. */
   noteFocusToken: number
+  /** Bumped to tell the bookmarks page to focus its add-link box. */
+  bookmarkFocusToken: number
   backup: BackupStatus
   restorePrompt: 'tripwire' | 'import' | null
   bellOpen: boolean
@@ -30,6 +32,7 @@ type UiStore = {
   openSettings: () => void
   closeSettings: () => void
   focusNoteCapture: () => void
+  focusBookmarks: () => void
   setBackupStatus: (status: BackupStatus) => void
   openRestorePrompt: (kind: 'tripwire' | 'import') => void
   closeRestorePrompt: () => void
@@ -48,6 +51,7 @@ export const useUiStore = create<UiStore>()((set) => ({
   editingTask: null,
   settingsOpen: false,
   noteFocusToken: 0,
+  bookmarkFocusToken: 0,
   backup: { mode: 'unconfigured', lastBackupAt: null },
   restorePrompt: null,
   bellOpen: false,
@@ -60,6 +64,8 @@ export const useUiStore = create<UiStore>()((set) => ({
   openSettings: () => set({ settingsOpen: true }),
   closeSettings: () => set({ settingsOpen: false }),
   focusNoteCapture: () => set((s) => ({ activeTab: 'notes', noteFocusToken: s.noteFocusToken + 1 })),
+  focusBookmarks: () =>
+    set((s) => ({ activeTab: 'bookmarks', bookmarkFocusToken: s.bookmarkFocusToken + 1 })),
   setBackupStatus: (status) => set({ backup: status }),
   openRestorePrompt: (kind) => set({ restorePrompt: kind, settingsOpen: false }),
   closeRestorePrompt: () => set({ restorePrompt: null }),

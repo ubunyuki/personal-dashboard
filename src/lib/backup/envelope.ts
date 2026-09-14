@@ -37,7 +37,13 @@ export function validateEnvelope(raw: unknown): BackupEnvelope {
     throw new Error('Backup has no appData section.')
   }
   const appData = env.appData as Record<string, unknown>
-  for (const key of ['tasks', 'notes', 'events', 'boards'] as const) {
+  // Collections added by later schema versions are only required of envelopes
+  // written at those versions — older backup files must stay restorable.
+  const requiredArrays =
+    env.version >= 3
+      ? (['tasks', 'notes', 'events', 'boards', 'bookmarks', 'bookmarkGroups'] as const)
+      : (['tasks', 'notes', 'events', 'boards'] as const)
+  for (const key of requiredArrays) {
     if (!Array.isArray(appData[key])) {
       throw new Error(`Backup field appData.${key} is missing or not a list.`)
     }
@@ -78,6 +84,7 @@ export interface EnvelopeSummary {
   notes: number
   events: number
   boards: number
+  bookmarks: number
   exportedAt: string
 }
 
@@ -87,6 +94,7 @@ export function summarizeEnvelope(env: BackupEnvelope): EnvelopeSummary {
     notes: env.appData.notes?.length ?? 0,
     events: env.appData.events?.length ?? 0,
     boards: env.boards.length,
+    bookmarks: env.appData.bookmarks?.length ?? 0,
     exportedAt: env.exportedAt,
   }
 }

@@ -4,6 +4,7 @@ import { CalendarPopover } from './features/statusbar/CalendarPopover'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { TasksPage } from './features/tasks/TasksPage'
 import { NotesPage } from './features/notes/NotesPage'
+import { BookmarksPage } from './features/bookmarks/BookmarksPage'
 import { TaskEditor } from './features/tasks/TaskEditor'
 import { SettingsModal } from './features/settings/SettingsModal'
 import { RestorePrompt } from './features/settings/RestorePrompt'
@@ -30,6 +31,7 @@ export default function App() {
         {tab === 'dashboard' && <DashboardPage />}
         {tab === 'tasks' && <TasksPage />}
         {tab === 'notes' && <NotesPage />}
+        {tab === 'bookmarks' && <BookmarksPage />}
       </main>
       <footer className="flex shrink-0 items-center justify-between border-t border-slate-200 px-3 py-1 text-[11px] text-slate-400 dark:border-slate-800 dark:text-slate-600">
         <span>build {__BUILD_ID__}</span>

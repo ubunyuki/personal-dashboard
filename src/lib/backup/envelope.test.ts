@@ -22,6 +22,17 @@ function sampleAppData(): PersistedAppData {
     notes: [{ id: 'n1', text: 'hello\nworld', createdAt: A, updatedAt: A }],
     events: [],
     boards: [{ id: 'b1', name: 'Sketch', createdAt: A, updatedAt: A }],
+    bookmarks: [
+      {
+        id: 'bm1',
+        title: 'Observatory',
+        url: 'https://www.hko.gov.hk',
+        groupId: 'g1',
+        createdAt: A,
+        updatedAt: A,
+      },
+    ],
+    bookmarkGroups: [{ id: 'g1', name: 'Work', createdAt: A, updatedAt: A }],
     settings: defaultSettings(),
     lastChangeAt: A,
   }
@@ -51,7 +62,13 @@ describe('envelope round-trip', () => {
 
   it('summarizes counts', () => {
     const env = buildEnvelope(sampleAppData(), sampleBoards())
-    expect(summarizeEnvelope(env)).toMatchObject({ tasks: 1, notes: 1, events: 0, boards: 1 })
+    expect(summarizeEnvelope(env)).toMatchObject({
+      tasks: 1,
+      notes: 1,
+      events: 0,
+      boards: 1,
+      bookmarks: 1,
+    })
   })
 })
 
@@ -78,6 +95,12 @@ describe('validateEnvelope rejections', () => {
     expect(() => validateEnvelope(env)).toThrow(/appData\.tasks/)
   })
 
+  it('rejects v3 envelopes with non-array bookmarks', () => {
+    const env = JSON.parse(JSON.stringify(buildEnvelope(sampleAppData(), [])))
+    env.appData.bookmarks = 'oops'
+    expect(() => validateEnvelope(env)).toThrow(/appData\.bookmarks/)
+  })
+
   it('rejects malformed board scenes', () => {
     const env = JSON.parse(JSON.stringify(buildEnvelope(sampleAppData(), sampleBoards())))
     env.boards[0].scene = { appState: {} }
@@ -96,5 +119,27 @@ describe('applyEnvelope migration path', () => {
     const { appData } = applyEnvelope(env)
     expect(appData.settings).toEqual(defaultSettings())
     expect(appData.lastChangeAt).toBeNull()
+  })
+
+  it('accepts pre-v3 envelopes without bookmark fields and backfills them', () => {
+    // Regression guard: requiring the new arrays of OLD backup files would
+    // make every pre-bookmarks backup unrestorable.
+    const env = validateEnvelope({
+      version: 2,
+      exportedAt: A,
+      appData: {
+        tasks: [],
+        notes: [],
+        events: [],
+        boards: [],
+        settings: defaultSettings(),
+        lastChangeAt: null,
+      },
+      boards: [],
+    })
+    expect(summarizeEnvelope(env).bookmarks).toBe(0)
+    const { appData } = applyEnvelope(env)
+    expect(appData.bookmarks).toEqual([])
+    expect(appData.bookmarkGroups).toEqual([])
   })
 })
