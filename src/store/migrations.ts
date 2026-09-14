@@ -22,6 +22,7 @@ export function defaultAppData(): PersistedAppData {
     boards: [],
     bookmarks: [],
     bookmarkGroups: [],
+    projectMeta: [],
     settings: defaultSettings(),
     lastChangeAt: null,
   }

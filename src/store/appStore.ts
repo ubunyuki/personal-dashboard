@@ -6,6 +6,7 @@ import {
   type Bookmark,
   type BookmarkGroup,
   type CalEvent,
+  type GroupColor,
   type Note,
   type PersistedAppData,
   type Settings,
@@ -15,6 +16,12 @@ import {
 import { newId, nowIso } from '../lib/id'
 import { domainOf, normalizeUrl } from '../lib/bookmarks/url'
 import { splitNoteForTask } from '../lib/notes/splitNoteForTask'
+import {
+  clearProjectIn,
+  moveProjectIn,
+  renameProjectIn,
+  setProjectColorIn,
+} from '../features/tasks/projects'
 import { defaultAppData, runMigrations } from './migrations'
 
 export type TaskInput = Pick<Task, 'title'> &
@@ -53,6 +60,14 @@ export type AppStore = PersistedAppData & {
   moveBookmarkGroup: (id: string, delta: -1 | 1) => void
   /** Deleting a group moves its bookmarks to Ungrouped. */
   deleteBookmarkGroup: (id: string) => void
+  /** Rewrites every matching task tag; renaming onto an existing project merges. */
+  renameProject: (from: string, to: string) => void
+  /** undefined returns the project to its hash-derived colour. */
+  setProjectColor: (name: string, color: GroupColor | undefined) => void
+  /** Swap with the neighbour in derived order (delta -1 = up, +1 = down). */
+  moveProject: (name: string, delta: -1 | 1) => void
+  /** Members become untagged; the project disappears (it was only its tag). */
+  clearProject: (name: string) => void
   /** Restore path: replaces all persisted data via merge-set (replace-mode would strip actions). */
   replaceAll: (data: PersistedAppData) => void
   updateSettings: (patch: SettingsPatch) => void
@@ -71,6 +86,7 @@ export const persistedSlice = (s: AppStore): PersistedAppData => ({
   boards: s.boards,
   bookmarks: s.bookmarks,
   bookmarkGroups: s.bookmarkGroups,
+  projectMeta: s.projectMeta,
   settings: s.settings,
   lastChangeAt: s.lastChangeAt,
 })
@@ -303,6 +319,32 @@ export const useAppStore = create<AppStore>()(
           bookmarks: s.bookmarks.map((b) =>
             b.groupId === id ? { ...b, groupId: undefined } : b,
           ),
+          lastChangeAt: nowIso(),
+        })),
+
+      renameProject: (from, to) =>
+        set((s) => {
+          const r = renameProjectIn(s.tasks, s.projectMeta, from, to, nowIso())
+          if (r.tasks === s.tasks && r.projectMeta === s.projectMeta) return {}
+          return { ...r, lastChangeAt: nowIso() }
+        }),
+
+      setProjectColor: (name, color) =>
+        set((s) => ({
+          projectMeta: setProjectColorIn(s.projectMeta, name, color, nowIso()),
+          lastChangeAt: nowIso(),
+        })),
+
+      moveProject: (name, delta) =>
+        set((s) => {
+          const projectMeta = moveProjectIn(s.tasks, s.projectMeta, name, delta, nowIso())
+          if (projectMeta === s.projectMeta) return {}
+          return { projectMeta, lastChangeAt: nowIso() }
+        }),
+
+      clearProject: (name) =>
+        set((s) => ({
+          ...clearProjectIn(s.tasks, s.projectMeta, name, nowIso()),
           lastChangeAt: nowIso(),
         })),
 

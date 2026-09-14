@@ -13,29 +13,16 @@ import { Button } from '../../components/ui/Button'
 import { Card, cardTitleCls } from '../../components/ui/Card'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { inputCls } from '../../components/ui/Field'
+// Neutral hovers so rows and buttons read well on every group tint.
+import { swatchCls, tintedIconBtnCls as iconBtn } from '../../components/ui/swatches'
 import { domainOf } from '../../lib/bookmarks/url'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
-import type { Bookmark, BookmarkGroup, GroupColor } from '../../types'
+import { GROUP_COLORS, type Bookmark, type BookmarkGroup } from '../../types'
 import { Favicon } from './Favicon'
 
 /** <select> value for "no group". */
 const UNGROUPED = ''
-
-const GROUP_COLORS: GroupColor[] = ['sky', 'indigo', 'emerald', 'amber', 'rose', 'violet']
-
-const swatchCls: Record<GroupColor, string> = {
-  sky: 'bg-sky-400',
-  indigo: 'bg-indigo-400',
-  emerald: 'bg-emerald-400',
-  amber: 'bg-amber-400',
-  rose: 'bg-rose-400',
-  violet: 'bg-violet-400',
-}
-
-// Neutral hovers so rows and buttons read well on every group tint.
-const iconBtn =
-  'rounded p-1 text-slate-400 hover:bg-black/5 hover:text-slate-600 disabled:pointer-events-none disabled:opacity-30 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-300'
 
 const titleBase = 'text-xs font-semibold tracking-wide uppercase'
 

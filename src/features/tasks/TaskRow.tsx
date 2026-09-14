@@ -1,14 +1,17 @@
 import { Circle, CircleCheck, CircleDot } from 'lucide-react'
 import type { Task } from '../../types'
 import { formatDueLabel, isTaskOverdue } from '../../lib/dates/dates'
+import { tintChipCls } from '../../components/ui/swatches'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
+import { colorForProject } from './projects'
 import { priorityMeta, statusMeta } from './meta'
 
 const statusIcons = { todo: Circle, 'in-progress': CircleDot, done: CircleCheck } as const
 
 export function TaskRow({ task, now }: { task: Task; now: Date }) {
   const updateTask = useAppStore((s) => s.updateTask)
+  const projectMeta = useAppStore((s) => s.projectMeta)
   const openTaskEditor = useUiStore((s) => s.openTaskEditor)
   const done = task.status === 'done'
   const overdue = isTaskOverdue(task, now)
@@ -39,7 +42,13 @@ export function TaskRow({ task, now }: { task: Task; now: Date }) {
         )}
       </div>
       {task.project && (
-        <span className="hidden rounded-md bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-500 sm:inline dark:bg-slate-800 dark:text-slate-400">
+        <span
+          className={`hidden rounded-md px-1.5 py-0.5 text-[11px] sm:inline ${
+            tintChipCls[
+              colorForProject(task.project, projectMeta.find((m) => m.name === task.project))
+            ]
+          }`}
+        >
           #{task.project}
         </span>
       )}

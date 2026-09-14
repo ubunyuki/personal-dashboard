@@ -144,8 +144,17 @@ export function TaskEditor() {
               value={project}
               onChange={(e) => setProject(e.target.value)}
               placeholder="e.g. website-revamp"
+              list="project-tag-options"
             />
           </Field>
+          {/* Existing tags as suggestions — free text still allowed. */}
+          <datalist id="project-tag-options">
+            {[...new Set(tasks.map((t) => t.project).filter((p): p is string => !!p))]
+              .sort()
+              .map((name) => (
+                <option key={name} value={name} />
+              ))}
+          </datalist>
           <div className="mt-auto flex items-center gap-2 pt-2">
             <Button variant="primary" type="submit" disabled={!title.trim()}>
               {editing === 'new' ? 'Add task' : 'Save changes'}

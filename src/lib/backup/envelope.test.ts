@@ -33,6 +33,7 @@ function sampleAppData(): PersistedAppData {
       },
     ],
     bookmarkGroups: [{ id: 'g1', name: 'Work', createdAt: A, updatedAt: A }],
+    projectMeta: [{ name: 'reporting', color: 'rose', updatedAt: A }],
     settings: defaultSettings(),
     lastChangeAt: A,
   }
@@ -119,6 +120,17 @@ describe('applyEnvelope migration path', () => {
     const { appData } = applyEnvelope(env)
     expect(appData.settings).toEqual(defaultSettings())
     expect(appData.lastChangeAt).toBeNull()
+  })
+
+  it('accepts v3 envelopes written before projectMeta existed and backfills []', () => {
+    // A no-bump collection (M20) is never in requiredArraysFor: a v3 file
+    // from a pre-M20 build has no projectMeta and must stay restorable.
+    const legacy = JSON.parse(JSON.stringify(sampleAppData()))
+    delete legacy.projectMeta
+    const env = validateEnvelope({ version: 3, exportedAt: A, appData: legacy, boards: [] })
+    const { appData } = applyEnvelope(env)
+    expect(appData.projectMeta).toEqual([])
+    expect(appData.tasks).toEqual(sampleAppData().tasks)
   })
 
   it('accepts pre-v3 envelopes without bookmark fields and backfills them', () => {

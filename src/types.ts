@@ -52,8 +52,18 @@ export interface BoardMeta {
   updatedAt: string
 }
 
-/** Tint choices for bookmark group cards. */
+/** Tint choices for bookmark group cards and project tags. */
 export type GroupColor = 'sky' | 'indigo' | 'emerald' | 'amber' | 'rose' | 'violet'
+
+/** Canonical value list for GroupColor — swatch pickers iterate this. */
+export const GROUP_COLORS: readonly GroupColor[] = [
+  'sky',
+  'indigo',
+  'emerald',
+  'amber',
+  'rose',
+  'violet',
+]
 
 export interface BookmarkGroup {
   id: string
@@ -71,6 +81,28 @@ export interface Bookmark {
   /** undefined = ungrouped */
   groupId?: string
   createdAt: string
+  updatedAt: string
+}
+
+/**
+ * Decoration for a project tag — the tag string on tasks IS the project's
+ * identity; this side-car only carries colour and ordering.
+ *
+ * Deliberately added WITHOUT a SCHEMA_VERSION bump, which is safe ONLY for a
+ * top-level collection: zustand's shallow merge keeps the default [] when the
+ * key is absent from old persisted data, and restores run runMigrations,
+ * whose defaults spread fills it unconditionally. A NESTED field gets no such
+ * backfill on same-version rehydration (the shallow merge replaces the whole
+ * parent object) — that's why settings.weather.labelStyle is read as
+ * `?? 'name'` everywhere. Top-level absent key: safe. Nested: not.
+ */
+export interface ProjectMeta {
+  /** Matches Task.project exactly (trimmed). */
+  name: string
+  /** undefined = derived from a hash of the name. */
+  color?: GroupColor
+  /** undefined sorts after ordered entries, then alphabetically. */
+  order?: number
   updatedAt: string
 }
 
@@ -109,6 +141,9 @@ export interface PersistedAppData {
   boards: BoardMeta[]
   bookmarks: Bookmark[]
   bookmarkGroups: BookmarkGroup[]
+  /** Colour/order side-car for project tags — see ProjectMeta. NOT in
+   *  requiredArraysFor: pre-M20 v3 backups lack it and must stay valid. */
+  projectMeta: ProjectMeta[]
   settings: Settings
   /** Bumped only by data mutations, never by backup bookkeeping. */
   lastChangeAt: string | null
