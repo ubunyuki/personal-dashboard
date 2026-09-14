@@ -86,6 +86,8 @@ export interface WeatherSettings {
   hkoStation: string
   location?: WeatherLocation
   unit: 'celsius' | 'fahrenheit'
+  /** Chip label style: full place name (default) or a short code like "ST". */
+  labelStyle?: 'name' | 'code'
 }
 
 export interface Settings {

@@ -39,7 +39,7 @@ export async function fetchHko(station: string): Promise<WeatherNow> {
     label: cond.label,
     icon: cond.icon,
     place: t.place,
-    humidity: j.humidity?.data?.[0]?.value,
+    humidity: (j.humidity?.data?.find((d) => d.place === t.place) ?? j.humidity?.data?.[0])?.value,
     observedAt: j.temperature?.recordTime,
   }
 }

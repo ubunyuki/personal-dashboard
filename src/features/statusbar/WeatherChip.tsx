@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import type { ConditionIcon } from '../../lib/weather/conditions'
+import { shortLabel } from '../../lib/weather/stationCodes'
 import { getWeather, isWeatherStale } from '../../lib/weather/weather'
 import type { WeatherNow } from '../../lib/weather/providers'
 import { useAppStore } from '../../store/appStore'
@@ -69,6 +70,15 @@ export function WeatherChip() {
       ? null
       : Math.round(weather.unit === 'fahrenheit' ? (ok.tempC * 9) / 5 + 32 : ok.tempC)
   const Icon = ok ? icons[ok.icon] : Cloud
+  // Label reflects the SELECTED location from settings, never the cached
+  // fetch's place (which may be a fallback station).
+  const selectedName = weather.source === 'hko' ? weather.hkoStation : weather.location?.name
+  const label =
+    selectedName == null
+      ? null
+      : (weather.labelStyle ?? 'name') === 'code'
+        ? shortLabel(selectedName)
+        : selectedName
   const updated =
     ok?.observedAt && !Number.isNaN(Date.parse(ok.observedAt))
       ? ` · updated ${format(new Date(ok.observedAt), 'HH:mm')}`
@@ -89,7 +99,19 @@ export function WeatherChip() {
       className="flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
     >
       <Icon size={14} strokeWidth={1.75} className={ok ? '' : 'opacity-50'} />
+      {label && (
+        <span className="hidden min-w-0 items-center sm:flex">
+          <span className="max-w-28 truncate">{label}</span>
+          <span className="ml-1 text-slate-300 dark:text-slate-600">·</span>
+        </span>
+      )}
       <span className="tabular-nums">{temp != null ? `${temp}°` : '—'}</span>
+      {ok?.humidity != null && (
+        <span className="hidden items-center sm:flex">
+          <span className="mr-1 text-slate-300 dark:text-slate-600">·</span>
+          <span className="tabular-nums">{Math.round(ok.humidity)}%</span>
+        </span>
+      )}
     </button>
   )
 }

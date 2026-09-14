@@ -87,6 +87,18 @@ export function WeatherSection() {
                 <option value="fahrenheit">°F</option>
               </select>
             </Field>
+            <Field label="Chip label">
+              <select
+                className={inputCls}
+                value={weather.labelStyle ?? 'name'}
+                onChange={(e) =>
+                  updateSettings({ weather: { labelStyle: e.target.value as 'name' | 'code' } })
+                }
+              >
+                <option value="name">Full name</option>
+                <option value="code">Short code</option>
+              </select>
+            </Field>
           </div>
           {weather.source === 'hko' ? (
             <Field label="Station">

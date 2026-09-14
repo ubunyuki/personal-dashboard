@@ -3,7 +3,13 @@ import { SCHEMA_VERSION, type PersistedAppData, type Settings } from '../types'
 export function defaultSettings(): Settings {
   return {
     theme: 'system',
-    weather: { enabled: true, source: 'hko', hkoStation: 'Hong Kong Observatory', unit: 'celsius' },
+    weather: {
+      enabled: true,
+      source: 'hko',
+      hkoStation: 'Hong Kong Observatory',
+      unit: 'celsius',
+      labelStyle: 'name',
+    },
     weekStartsOn: 1,
   }
 }
