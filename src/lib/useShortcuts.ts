@@ -1,15 +1,26 @@
 import { useEffect } from 'react'
 import { useUiStore } from '../store/uiStore'
 
-/** Global shortcuts: N = new note, T = new task, B = bookmarks, ? = help.
- *  Inactive while typing or while any overlay (editor, settings, help,
- *  whiteboard, restore) is open. */
+/** Global shortcuts: Ctrl/⌘+K or / = palette, N = new note, T = new task,
+ *  B = bookmarks, ? = help. The letters are inactive while typing or while
+ *  any overlay (palette, editor, settings, help, whiteboard, restore) is
+ *  open; Ctrl+K works even from inside a text field — opening the palette
+ *  mid-typing is expected — but not over the whiteboard (Excalidraw owns
+ *  its keyboard) or the restore prompt. */
 export function useShortcuts(): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return
       const ui = useUiStore.getState()
+      // Above the modifier guard on purpose — it IS a modifier chord.
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && (e.key === 'k' || e.key === 'K')) {
+        if (ui.whiteboardOpen || ui.restorePrompt) return
+        e.preventDefault()
+        ui.togglePalette()
+        return
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return
       if (
+        ui.paletteOpen ||
         ui.editingTask !== null ||
         ui.settingsOpen ||
         ui.helpOpen ||
@@ -31,6 +42,10 @@ export function useShortcuts(): void {
       } else if (e.key === '?') {
         e.preventDefault()
         ui.openHelp()
+      } else if (e.key === '/') {
+        // Secondary opener; below the typing guard so "/" still types.
+        e.preventDefault()
+        ui.togglePalette()
       }
     }
     window.addEventListener('keydown', onKey)

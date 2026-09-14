@@ -4,6 +4,7 @@ import {
   CalendarDays,
   CloudSun,
   Keyboard,
+  ListTodo,
   Presentation,
   Save,
   StickyNote,
@@ -101,6 +102,15 @@ export function HelpModal() {
               <Kbd>Esc</Kbd>
             </span>
             <span>Close dialogs</span>
+            <span className="flex gap-1">
+              <Kbd>Ctrl</Kbd>
+              <Kbd>K</Kbd>
+            </span>
+            <span>Search & commands</span>
+            <span>
+              <Kbd>/</Kbd>
+            </span>
+            <span>Search (same palette)</span>
           </div>
         </HelpCard>
 
@@ -144,12 +154,22 @@ export function HelpModal() {
           </HelpCard>
         </div>
 
-        <HelpCard icon={Presentation} title="Whiteboard">
-          <ul className="flex flex-col gap-1">
-            <Li>Opens from the projector button in the status bar; boards autosave locally</Li>
-            <Li>Rename or switch boards and export PNG/SVG from the board header</Li>
-          </ul>
-        </HelpCard>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <HelpCard icon={ListTodo} title="Tasks & projects">
+            <ul className="flex flex-col gap-1">
+              <Li>Tag tasks with a project in the editor — tags become coloured chips</Li>
+              <Li>Click a chip to filter; the layers button groups tasks by project</Li>
+              <Li>Rename, recolour or reorder a project from its section header</Li>
+            </ul>
+          </HelpCard>
+
+          <HelpCard icon={Presentation} title="Whiteboard">
+            <ul className="flex flex-col gap-1">
+              <Li>Opens from the projector button in the status bar; boards autosave locally</Li>
+              <Li>Rename or switch boards and export PNG/SVG from the board header</Li>
+            </ul>
+          </HelpCard>
+        </div>
 
         <HelpCard icon={Save} title="Backups & restore">
           <ol className="flex flex-col gap-1.5">

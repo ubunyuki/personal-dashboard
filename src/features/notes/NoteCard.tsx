@@ -10,7 +10,7 @@ import { useUiStore } from '../../store/uiStore'
 const actionCls =
   'flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
 
-export function NoteCard({ note }: { note: Note }) {
+export function NoteCard({ note, highlight = false }: { note: Note; highlight?: boolean }) {
   const updateNote = useAppStore((s) => s.updateNote)
   const deleteNote = useAppStore((s) => s.deleteNote)
   const convertNoteToTask = useAppStore((s) => s.convertNoteToTask)
@@ -33,7 +33,12 @@ export function NoteCard({ note }: { note: Note }) {
   }
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+    <article
+      id={`note-${note.id}`}
+      className={`rounded-xl border border-slate-200 bg-white p-3 transition-shadow dark:border-slate-800 dark:bg-slate-900 ${
+        highlight ? 'ring-2 ring-indigo-400 dark:ring-indigo-500' : ''
+      }`}
+    >
       {editing ? (
         <textarea
           autoFocus

@@ -29,6 +29,9 @@ type UiState = {
   calendar: { open: boolean; date: string | null }
   weatherMenuOpen: boolean
   whiteboardOpen: boolean
+  paletteOpen: boolean
+  /** Note to scroll into view + highlight after a palette jump. */
+  noteFocusId: string | null
 }
 
 type UiStore = UiState & {
@@ -55,6 +58,11 @@ type UiStore = UiState & {
   closeWeatherMenu: () => void
   openWhiteboard: () => void
   closeWhiteboard: () => void
+  togglePalette: () => void
+  closePalette: () => void
+  /** Jump to a note: switches to the Notes tab and marks it for highlight. */
+  focusNote: (id: string) => void
+  clearNoteFocus: () => void
 }
 
 /** Initial UI state — exported so tests can reset the store between cases. */
@@ -73,6 +81,8 @@ export const initialUiState = (): UiState => ({
   calendar: { open: false, date: null },
   weatherMenuOpen: false,
   whiteboardOpen: false,
+  paletteOpen: false,
+  noteFocusId: null,
 })
 
 export const useUiStore = create<UiStore>()((set) => ({
@@ -125,4 +135,16 @@ export const useUiStore = create<UiStore>()((set) => ({
       calendar: { ...s.calendar, open: false },
     })),
   closeWhiteboard: () => set({ whiteboardOpen: false }),
+  // The palette closes the status-bar popovers on open, like they close
+  // each other. Query/selection live in the component (reset on unmount).
+  togglePalette: () =>
+    set((s) => ({
+      paletteOpen: !s.paletteOpen,
+      bellOpen: false,
+      weatherMenuOpen: false,
+      calendar: { ...s.calendar, open: false },
+    })),
+  closePalette: () => set({ paletteOpen: false }),
+  focusNote: (id) => set({ activeTab: 'notes', noteFocusId: id }),
+  clearNoteFocus: () => set({ noteFocusId: null }),
 }))

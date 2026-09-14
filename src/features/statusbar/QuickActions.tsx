@@ -1,4 +1,4 @@
-import { HelpCircle, NotebookPen, Plus, Presentation, Settings } from 'lucide-react'
+import { HelpCircle, NotebookPen, Plus, Presentation, Search, Settings } from 'lucide-react'
 import { useUiStore } from '../../store/uiStore'
 
 export const iconBtnCls =
@@ -10,8 +10,17 @@ export function QuickActions() {
   const openTaskEditor = useUiStore((s) => s.openTaskEditor)
   const openHelp = useUiStore((s) => s.openHelp)
   const openSettings = useUiStore((s) => s.openSettings)
+  const togglePalette = useUiStore((s) => s.togglePalette)
   return (
     <div className="flex items-center gap-0.5">
+      <button
+        type="button"
+        title="Search & commands (Ctrl+K)"
+        className={iconBtnCls}
+        onClick={togglePalette}
+      >
+        <Search size={16} strokeWidth={1.75} />
+      </button>
       <button type="button" title="Whiteboard" className={iconBtnCls} onClick={openWhiteboard}>
         <Presentation size={16} strokeWidth={1.75} />
       </button>
