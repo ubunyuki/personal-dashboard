@@ -30,6 +30,7 @@ type UiState = {
   weatherMenuOpen: boolean
   whiteboardOpen: boolean
   paletteOpen: boolean
+  reviewOpen: boolean
   /** Note to scroll into view + highlight after a palette jump. */
   noteFocusId: string | null
 }
@@ -60,6 +61,8 @@ type UiStore = UiState & {
   closeWhiteboard: () => void
   togglePalette: () => void
   closePalette: () => void
+  openReview: () => void
+  closeReview: () => void
   /** Jump to a note: switches to the Notes tab and marks it for highlight. */
   focusNote: (id: string) => void
   clearNoteFocus: () => void
@@ -82,6 +85,7 @@ export const initialUiState = (): UiState => ({
   weatherMenuOpen: false,
   whiteboardOpen: false,
   paletteOpen: false,
+  reviewOpen: false,
   noteFocusId: null,
 })
 
@@ -145,6 +149,15 @@ export const useUiStore = create<UiStore>()((set) => ({
       calendar: { ...s.calendar, open: false },
     })),
   closePalette: () => set({ paletteOpen: false }),
+  openReview: () =>
+    set((s) => ({
+      reviewOpen: true,
+      paletteOpen: false,
+      bellOpen: false,
+      weatherMenuOpen: false,
+      calendar: { ...s.calendar, open: false },
+    })),
+  closeReview: () => set({ reviewOpen: false }),
   focusNote: (id) => set({ activeTab: 'notes', noteFocusId: id }),
   clearNoteFocus: () => set({ noteFocusId: null }),
 }))

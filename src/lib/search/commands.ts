@@ -11,6 +11,7 @@ export type CommandId =
   | 'go-notes'
   | 'go-bookmarks'
   | 'open-calendar'
+  | 'open-review'
   | 'open-whiteboard'
   | 'open-settings'
   | 'open-help'
@@ -30,6 +31,7 @@ export const COMMANDS: CommandDef[] = [
   { id: 'go-notes', label: 'Go to Notes', keywords: 'jottings' },
   { id: 'go-bookmarks', label: 'Go to Bookmarks', keywords: 'links b' },
   { id: 'open-calendar', label: 'Open calendar', keywords: 'month events schedule' },
+  { id: 'open-review', label: 'Weekly review', keywords: 'standup done summary recap markdown' },
   { id: 'open-whiteboard', label: 'Open whiteboard', keywords: 'excalidraw draw sketch board' },
   { id: 'open-settings', label: 'Open Settings', keywords: 'preferences backups weather theme' },
   { id: 'open-help', label: 'Open help', keywords: 'guide shortcuts manual ?' },

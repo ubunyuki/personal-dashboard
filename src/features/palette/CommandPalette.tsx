@@ -61,6 +61,7 @@ export function CommandPalette() {
       focusNoteCapture: ui.focusNoteCapture,
       focusBookmarks: ui.focusBookmarks,
       openTaskEditorNew: () => ui.openTaskEditor(),
+      openReview: ui.openReview,
       openWhiteboard: ui.openWhiteboard,
       openSettings: ui.openSettings,
       openHelp: ui.openHelp,

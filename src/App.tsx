@@ -1,6 +1,7 @@
 import { StatusBar } from './features/statusbar/StatusBar'
 import { WhiteboardOverlay } from './features/whiteboard/WhiteboardOverlay'
 import { CommandPalette } from './features/palette/CommandPalette'
+import { ReviewDrawer } from './features/review/ReviewDrawer'
 import { CalendarPopover } from './features/statusbar/CalendarPopover'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { TasksPage } from './features/tasks/TasksPage'
@@ -27,6 +28,7 @@ export default function App() {
   const helpOpen = useUiStore((s) => s.helpOpen)
   const restorePrompt = useUiStore((s) => s.restorePrompt)
   const paletteOpen = useUiStore((s) => s.paletteOpen)
+  const reviewOpen = useUiStore((s) => s.reviewOpen)
   return (
     <div className="flex h-full min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <StatusBar />
@@ -54,6 +56,7 @@ export default function App() {
       {helpOpen && <HelpModal />}
       {restorePrompt !== null && <RestorePrompt />}
       {paletteOpen && <CommandPalette />}
+      {reviewOpen && <ReviewDrawer />}
     </div>
   )
 }

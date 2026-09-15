@@ -129,6 +129,7 @@ describe('runResultAction', () => {
     focusNoteCapture: vi.fn(),
     focusBookmarks: vi.fn(),
     openTaskEditorNew: vi.fn(),
+    openReview: vi.fn(),
     openWhiteboard: vi.fn(),
     openSettings: vi.fn(),
     openHelp: vi.fn(),

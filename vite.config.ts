@@ -37,6 +37,9 @@ export default defineConfig({
   },
   test: {
     passWithNoTests: true,
+    // Pinned so local-calendar tests (weekly review bucketing, due dates)
+    // mean the same thing on a UTC CI box as on the Hong Kong dev machine.
+    env: { TZ: 'Asia/Hong_Kong' },
     // Two projects split by extension: pure logic stays fast in node; only
     // component tests (.tsx) pay for jsdom. `extends: true` is load-bearing —
     // rendering <App /> needs the root `define` (__BUILD_ID__) and the

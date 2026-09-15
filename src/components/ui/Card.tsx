@@ -38,22 +38,27 @@ export const cardTitleCls: Record<CardAccent, string> = {
 }
 
 /** Dashboard/section card. `accent` tints the surface and title to give each
- *  domain (tasks, calendar, notes, bookmarks) a recognizable hue. */
+ *  domain (tasks, calendar, notes, bookmarks) a recognizable hue.
+ *  With `onClick` the whole card becomes a button, so its children must then
+ *  be phrasing content — spans, not <p> or <h3>. */
 export function Card({
   accent = 'neutral',
   title,
   right,
   className = '',
+  onClick,
   children,
 }: {
   accent?: CardAccent
   title?: string
   right?: ReactNode
   className?: string
+  onClick?: () => void
   children: ReactNode
 }) {
-  return (
-    <section className={`rounded-xl border p-3 ${cardCls[accent]} ${className}`}>
+  const cls = `rounded-xl border p-3 ${cardCls[accent]} ${className}`
+  const body = (
+    <>
       {title !== undefined && (
         <header className="mb-1 flex items-baseline justify-between">
           <h3 className={`text-xs font-semibold tracking-wide uppercase ${cardTitleCls[accent]}`}>
@@ -65,6 +70,18 @@ export function Card({
         </header>
       )}
       {children}
-    </section>
+    </>
   )
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`${cls} text-left hover:border-indigo-300 hover:ring-2 hover:ring-indigo-200 dark:hover:border-indigo-700 dark:hover:ring-indigo-900`}
+      >
+        {body}
+      </button>
+    )
+  }
+  return <section className={cls}>{body}</section>
 }

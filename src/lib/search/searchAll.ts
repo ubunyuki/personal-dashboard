@@ -259,6 +259,7 @@ export interface ActionDeps {
   focusNoteCapture: () => void
   focusBookmarks: () => void
   openTaskEditorNew: () => void
+  openReview: () => void
   openWhiteboard: () => void
   openSettings: () => void
   openHelp: () => void
@@ -301,6 +302,9 @@ export function runResultAction(action: ResultAction, deps: ActionDeps): void {
           return
         case 'open-calendar':
           deps.openCalendar()
+          return
+        case 'open-review':
+          deps.openReview()
           return
         case 'open-whiteboard':
           deps.openWhiteboard()

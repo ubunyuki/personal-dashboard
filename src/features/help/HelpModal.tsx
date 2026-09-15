@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import {
   Bookmark,
+  CalendarCheck,
   CalendarDays,
   CloudSun,
   Keyboard,
@@ -170,6 +171,14 @@ export function HelpModal() {
             </ul>
           </HelpCard>
         </div>
+
+        <HelpCard icon={CalendarCheck} title="Weekly review">
+          <ul className="flex flex-col gap-1">
+            <Li>Open it from the “Done this week” tile, or run it from the palette</Li>
+            <Li>Arrows step back through past weeks; group by day or by project</Li>
+            <Li>Copy as markdown for a standup or 1:1 — meetings optional</Li>
+          </ul>
+        </HelpCard>
 
         <HelpCard icon={Save} title="Backups & restore">
           <ol className="flex flex-col gap-1.5">

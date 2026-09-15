@@ -12,8 +12,15 @@ to a OneDrive folder.
 - **Dashboard** — overdue / due-today / due-this-week / in-progress buckets,
   metric tiles, upcoming events, recent notes + bookmarks; each section has
   its own accent colour.
-- **Tasks** — quick add, filters/sorts, editor (status, priority, due
-  date+time, project tag), status cycling on rows.
+- **Search & commands** — `Ctrl+K` (or `/`) opens one fuzzy search across
+  tasks, notes, bookmarks and events, plus a command runner for every
+  navigation and action.
+- **Tasks & projects** — quick add, filters/sorts, editor (status, priority,
+  due date+time, project tag), status cycling on rows; group the board by
+  project, each with its own colour, renameable and reorderable.
+- **Weekly review** — the “Done this week” tile opens a drawer of what you
+  finished, grouped by day or by project, with meetings and a one-click
+  copy as standup-ready markdown.
 - **Notes** — instant capture (`Ctrl+Enter`; drag-bar resizable box with
   remembered height, drafts survive tab switches), inline edit,
   convert-to-task (first line → title, rest → description, linked both
@@ -33,15 +40,15 @@ to a OneDrive folder.
 - **Backups** — auto-snapshots to a picked folder (hourly on change, keeps
   newest 30), staleness nudges, manual export/restore, storage-clear tripwire.
 
-Keyboard: `N` new note · `T` new task · `B` bookmarks · `?` help ·
-`Ctrl+Enter` save note · `Esc` close.
+Keyboard: `Ctrl+K` search & commands · `N` new note · `T` new task ·
+`B` bookmarks · `?` help · `Ctrl+Enter` save note · `Esc` close.
 
 ## Develop (Mac)
 
 ```sh
 npm install
 npm run dev        # http://localhost:5173
-npx vitest run     # 51 unit tests
+npx vitest run     # 114 tests — `unit` in node, `dom` in jsdom
 npm run build && npm run preview
 ```
 

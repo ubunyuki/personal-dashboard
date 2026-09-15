@@ -21,6 +21,7 @@ export function useShortcuts(): void {
       if (e.metaKey || e.ctrlKey || e.altKey) return
       if (
         ui.paletteOpen ||
+        ui.reviewOpen ||
         ui.editingTask !== null ||
         ui.settingsOpen ||
         ui.helpOpen ||
