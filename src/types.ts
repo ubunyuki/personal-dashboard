@@ -32,6 +32,11 @@ export interface Note {
   id: string
   text: string
   convertedToTaskId?: string
+  /** Explicit display rank, written only once the user reorders; absent means
+   *  "unranked", which sorts newest-first. See features/notes/ordering.ts. */
+  order?: number
+  /** Pinned notes also render as a dashboard tile. */
+  pinned?: boolean
   createdAt: string
   updatedAt: string
 }

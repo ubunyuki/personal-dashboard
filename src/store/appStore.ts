@@ -16,6 +16,7 @@ import {
 import { newId, nowIso } from '../lib/id'
 import { domainOf, normalizeUrl } from '../lib/bookmarks/url'
 import { splitNoteForTask } from '../lib/notes/splitNoteForTask'
+import { moveNoteIn } from '../features/notes/ordering'
 import {
   clearProjectIn,
   moveProjectIn,
@@ -41,6 +42,10 @@ export type AppStore = PersistedAppData & {
   addNote: (text: string) => Note
   updateNote: (id: string, text: string) => void
   deleteNote: (id: string) => void
+  /** Swap with the neighbour in display order (delta -1 = up, +1 = down). */
+  moveNote: (id: string, delta: -1 | 1) => void
+  /** Pin/unpin for the dashboard tile. */
+  toggleNotePin: (id: string) => void
   /** Returns the created task, or null if the note is missing, empty, or already converted. */
   convertNoteToTask: (noteId: string) => Task | null
   addEvent: (input: EventInput) => CalEvent
@@ -163,6 +168,21 @@ export const useAppStore = create<AppStore>()(
           tasks: s.tasks.map((t) =>
             t.sourceNoteId === id ? { ...t, sourceNoteId: undefined } : t,
           ),
+          lastChangeAt: nowIso(),
+        })),
+
+      moveNote: (id, delta) =>
+        set((s) => {
+          const notes = moveNoteIn(s.notes, id, delta)
+          if (notes === s.notes) return {}
+          return { notes, lastChangeAt: nowIso() }
+        }),
+
+      // Neither move nor pin touches updatedAt — they are not edits of the
+      // note text; lastChangeAt is what tells the backup something changed.
+      toggleNotePin: (id) =>
+        set((s) => ({
+          notes: s.notes.map((n) => (n.id === id ? { ...n, pinned: !(n.pinned ?? false) } : n)),
           lastChangeAt: nowIso(),
         })),
 

@@ -1,16 +1,16 @@
 import { useMemo } from 'react'
 import { format, parseISO } from 'date-fns'
 import { Card } from '../../components/ui/Card'
+import { sortNotes } from '../notes/ordering'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 
 export function RecentNotes() {
   const notes = useAppStore((s) => s.notes)
   const setActiveTab = useUiStore((s) => s.setActiveTab)
-  const recent = useMemo(
-    () => [...notes].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 5),
-    [notes],
-  )
+  // Same order as the Notes page — the two used to disagree, so a reordered
+  // or newly captured note could top one list and not the other.
+  const recent = useMemo(() => sortNotes(notes).slice(0, 5), [notes])
   return (
     <Card accent="notes" title="Recent notes" right={notes.length}>
       {recent.length === 0 ? (
@@ -28,7 +28,7 @@ export function RecentNotes() {
             >
               <span className="min-w-0 flex-1 truncate text-sm">{n.text.split('\n')[0]}</span>
               <span className="shrink-0 text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
-                {format(parseISO(n.updatedAt), 'd MMM HH:mm')}
+                {format(parseISO(n.createdAt), 'd MMM HH:mm')}
               </span>
             </button>
           ))}

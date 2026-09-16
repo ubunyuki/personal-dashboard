@@ -4,15 +4,13 @@ import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 import { NoteCapture } from './NoteCapture'
 import { NoteCard } from './NoteCard'
+import { sortNotes } from './ordering'
 
 export function NotesPage() {
   const notes = useAppStore((s) => s.notes)
   const noteFocusId = useUiStore((s) => s.noteFocusId)
   const clearNoteFocus = useUiStore((s) => s.clearNoteFocus)
-  const sorted = useMemo(
-    () => [...notes].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [notes],
-  )
+  const sorted = useMemo(() => sortNotes(notes), [notes])
   // Palette jump: scroll the note into view, let the ring show briefly.
   useEffect(() => {
     if (!noteFocusId) return
@@ -30,8 +28,14 @@ export function NotesPage() {
         />
       ) : (
         <div className="flex flex-col gap-2">
-          {sorted.map((n) => (
-            <NoteCard key={n.id} note={n} highlight={n.id === noteFocusId} />
+          {sorted.map((n, i) => (
+            <NoteCard
+              key={n.id}
+              note={n}
+              highlight={n.id === noteFocusId}
+              first={i === 0}
+              last={i === sorted.length - 1}
+            />
           ))}
         </div>
       )}

@@ -1,18 +1,32 @@
 import { useState } from 'react'
-import { ArrowRight, Pencil, SquareCheck, Trash2 } from 'lucide-react'
+import { ArrowRight, ChevronDown, ChevronUp, Pencil, Pin, PinOff, SquareCheck, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { parseISO } from 'date-fns'
 import type { Note } from '../../types'
 import { inputCls } from '../../components/ui/Field'
+import { tintedIconBtnCls as iconBtn } from '../../components/ui/swatches'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 
 const actionCls =
   'flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
 
-export function NoteCard({ note, highlight = false }: { note: Note; highlight?: boolean }) {
+export function NoteCard({
+  note,
+  highlight = false,
+  first = true,
+  last = true,
+}: {
+  note: Note
+  highlight?: boolean
+  /** Ends of the display order — the arrows disable rather than disappear. */
+  first?: boolean
+  last?: boolean
+}) {
   const updateNote = useAppStore((s) => s.updateNote)
   const deleteNote = useAppStore((s) => s.deleteNote)
+  const moveNote = useAppStore((s) => s.moveNote)
+  const toggleNotePin = useAppStore((s) => s.toggleNotePin)
   const convertNoteToTask = useAppStore((s) => s.convertNoteToTask)
   const openTaskEditor = useUiStore((s) => s.openTaskEditor)
   const [editing, setEditing] = useState(false)
@@ -68,6 +82,37 @@ export function NoteCard({ note, highlight = false }: { note: Note; highlight?: 
         </p>
       )}
       <footer className="mt-2 flex items-center gap-1.5">
+        <button
+          type="button"
+          title="Move note up"
+          className={iconBtn}
+          disabled={first}
+          onClick={() => moveNote(note.id, -1)}
+        >
+          <ChevronUp size={13} />
+        </button>
+        <button
+          type="button"
+          title="Move note down"
+          className={iconBtn}
+          disabled={last}
+          onClick={() => moveNote(note.id, 1)}
+        >
+          <ChevronDown size={13} />
+        </button>
+        <button
+          type="button"
+          title={note.pinned ? 'Unpin from the dashboard' : 'Pin to the dashboard'}
+          aria-pressed={note.pinned === true}
+          className={
+            note.pinned
+              ? 'rounded p-1 text-emerald-600 hover:bg-emerald-100 dark:text-emerald-400 dark:hover:bg-emerald-900/40'
+              : iconBtn
+          }
+          onClick={() => toggleNotePin(note.id)}
+        >
+          {note.pinned ? <PinOff size={13} /> : <Pin size={13} />}
+        </button>
         <span className="mr-auto text-[11px] text-slate-400 dark:text-slate-500">
           {format(parseISO(note.createdAt), 'd MMM HH:mm')}
         </span>

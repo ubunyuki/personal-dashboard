@@ -4,6 +4,7 @@ import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 import { metrics, taskBuckets } from '../../store/selectors'
 import { MetricTiles } from './MetricTiles'
+import { PinnedNotes } from './PinnedNotes'
 import { RecentBookmarks } from './RecentBookmarks'
 import { RecentNotes } from './RecentNotes'
 import { TaskBucketWidget } from './TaskBucketWidget'
@@ -29,6 +30,9 @@ export function DashboardPage() {
           New machine or cleared browser? Restore from a backup file →
         </button>
       )}
+      {/* Full width and above the buckets: a pinned note is there to be read,
+          and the tile renders nothing at all while nothing is pinned. */}
+      <PinnedNotes />
       <div className="grid gap-3 md:grid-cols-2">
         <TaskBucketWidget title="Overdue" tasks={buckets.overdue} now={now} emptyText="Nothing overdue." />
         <TaskBucketWidget title="Due today" tasks={buckets.dueToday} now={now} emptyText="Clear for today." />
