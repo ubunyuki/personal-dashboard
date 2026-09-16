@@ -6,7 +6,7 @@ they are collected so they can be worked through in one sitting.
 
 Status key: `[ ]` open · `[x]` done · `[~]` accepted, no action intended.
 
-Last updated: 2026-09-17 (during M30).
+Last updated: 2026-09-17 (during M31).
 
 ---
 
@@ -72,8 +72,9 @@ running `npm run dev` and a human looking at the screen.
 - [ ] **K. Annual `gen-hk-holidays` re-run.** `src/lib/dates/hkHolidays.ts` is
   generated from the 1823 iCal feed and currently covers **2025–2027**. Next
   year's holidays are gazetted each May, so re-run
-  `node scripts/gen-hk-holidays.mjs` after May 2027 at the latest. To be
-  written into `README.md` as part of M31.
+  `node scripts/gen-hk-holidays.mjs` after May 2027 at the latest. Documented
+  in `README.md` under "Bundled data" (M31) — the reminder to actually do it
+  stays open here.
 
 ## 5. Deferred features
 

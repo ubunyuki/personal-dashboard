@@ -1,10 +1,13 @@
 import type { ReactNode } from 'react'
 import {
   Bookmark,
+  Bus,
   CalendarCheck,
   CalendarDays,
+  CloudAlert,
   CloudSun,
   Keyboard,
+  LayoutGrid,
   ListTodo,
   Presentation,
   Save,
@@ -72,8 +75,8 @@ export function HelpModal() {
       <div className="flex flex-col gap-3">
         <p className="text-sm text-slate-600 dark:text-slate-300">
           The <strong>Dashboard</strong> is the overview — <strong>Tasks</strong>,{' '}
-          <strong>Notes</strong> and <strong>Bookmarks</strong> are the full pages behind its
-          colour-coded widgets.
+          <strong>Notes</strong>, <strong>Bookmarks</strong> and <strong>Bus</strong> are the full
+          pages behind its colour-coded widgets.
         </p>
 
         <HelpCard icon={Keyboard} title="Keyboard shortcuts">
@@ -116,12 +119,25 @@ export function HelpModal() {
         </HelpCard>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <HelpCard icon={CalendarDays} title="Calendar & reminders">
+          <HelpCard icon={LayoutGrid} title="Dashboard layout">
             <ul className="flex flex-col gap-1">
-              <Li>Click the clock to open the month calendar</Li>
-              <Li>Indigo dots = task deadlines · amber = events</Li>
-              <Li>Add an event directly on any day</Li>
-              <Li>The bell gathers overdue, due-soon and today</Li>
+              <Li>“Edit layout” puts a strip of controls above every tile</Li>
+              <Li>Arrows reorder; the eye hides a tile without losing its place</Li>
+              <Li>
+                A tile with nothing in it — pinned notes, bus arrivals — hides itself until it
+                has something to show
+              </Li>
+            </ul>
+          </HelpCard>
+
+          <HelpCard icon={ListTodo} title="Tasks & projects">
+            <ul className="flex flex-col gap-1">
+              <Li>
+                Tag tasks in the editor, separating several with commas — tags become coloured
+                chips, and a task appears under every project it carries
+              </Li>
+              <Li>Click a chip to filter; the layers button groups tasks by project</Li>
+              <Li>Rename, recolour or reorder a project from its section header</Li>
             </ul>
           </HelpCard>
 
@@ -130,6 +146,7 @@ export function HelpModal() {
               <Li>
                 <Kbd>Ctrl</Kbd>+<Kbd>Enter</Kbd> saves instantly
               </Li>
+              <Li>Arrows reorder a note; the pin puts it on the dashboard</Li>
               <Li>Drag the bar under the box to resize it</Li>
               <Li>Drafts survive switching tabs</Li>
               <Li>Convert a note to a task — first line becomes the title</Li>
@@ -144,6 +161,28 @@ export function HelpModal() {
               <Li>Site icons need network; offline shows a globe</Li>
             </ul>
           </HelpCard>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <HelpCard icon={CalendarDays} title="Calendar & reminders">
+            <ul className="flex flex-col gap-1">
+              <Li>Click the clock to open the month calendar</Li>
+              <Li>Indigo dots = task deadlines · amber = events</Li>
+              <Li>Sundays and Hong Kong public holidays are red, holiday named on the day</Li>
+              <Li>Add an event directly on any day</Li>
+              <Li>The bell gathers overdue, due-soon and today</Li>
+              <Li>Start the week on Sunday or Monday in Settings → Appearance</Li>
+            </ul>
+          </HelpCard>
+
+          <HelpCard icon={Bus} title="Bus arrivals">
+            <ul className="flex flex-col gap-1">
+              <Li>Bus tab → pick KMB or Citybus, search a route, then a stop</Li>
+              <Li>The live times appear before you save anything — handy for a one-off</Li>
+              <Li>“Add” puts the stop on the dashboard; arrows reorder, pencil renames</Li>
+              <Li>Times are the operators' own estimates, refreshed every minute</Li>
+            </ul>
+          </HelpCard>
 
           <HelpCard icon={CloudSun} title="Weather">
             <ul className="flex flex-col gap-1">
@@ -153,17 +192,23 @@ export function HelpModal() {
               <Li>HKO blocked at work? Switch the source to Open-Meteo</Li>
             </ul>
           </HelpCard>
+
+          <HelpCard icon={CloudAlert} title="Weather warnings">
+            <ul className="flex flex-col gap-1">
+              <Li>Switch them on in Settings → Weather; sound and desktop notice are optional</Li>
+              <Li>The chip carries the official HKO icons — click it for the detail</Li>
+              <Li>A change alerts you once, even in a background tab; a repeat check never does</Li>
+              <Li>“Expected” is an advance tip from HKO, not a hoisted signal</Li>
+            </ul>
+          </HelpCard>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <HelpCard icon={ListTodo} title="Tasks & projects">
+          <HelpCard icon={CalendarCheck} title="Weekly review">
             <ul className="flex flex-col gap-1">
-              <Li>
-                Tag tasks in the editor, separating several with commas — tags become coloured
-                chips, and a task appears under every project it carries
-              </Li>
-              <Li>Click a chip to filter; the layers button groups tasks by project</Li>
-              <Li>Rename, recolour or reorder a project from its section header</Li>
+              <Li>Open it from the “Done this week” tile, or run it from the palette</Li>
+              <Li>Arrows step back through past weeks; group by day or by project</Li>
+              <Li>Copy as markdown for a standup or 1:1 — events optional</Li>
             </ul>
           </HelpCard>
 
@@ -174,14 +219,6 @@ export function HelpModal() {
             </ul>
           </HelpCard>
         </div>
-
-        <HelpCard icon={CalendarCheck} title="Weekly review">
-          <ul className="flex flex-col gap-1">
-            <Li>Open it from the “Done this week” tile, or run it from the palette</Li>
-            <Li>Arrows step back through past weeks; group by day or by project</Li>
-            <Li>Copy as markdown for a standup or 1:1 — events optional</Li>
-          </ul>
-        </HelpCard>
 
         <HelpCard icon={Save} title="Backups & restore">
           <ol className="flex flex-col gap-1.5">
