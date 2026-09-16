@@ -36,20 +36,24 @@ const event = (title: string, date: string, time?: string): CalEvent => ({
 
 describe('weekRange', () => {
   it('spans Monday to Sunday around now', () => {
-    expect(weekRange(NOW, 0)).toMatchObject({ start: '2026-09-14', end: '2026-09-20' })
+    expect(weekRange(NOW, 0, 1)).toMatchObject({ start: '2026-09-14', end: '2026-09-20' })
+  })
+
+  it('spans Sunday to Saturday when the week starts on Sunday', () => {
+    expect(weekRange(NOW, 0, 0)).toMatchObject({ start: '2026-09-13', end: '2026-09-19' })
   })
 
   it('offsets whole weeks in both directions', () => {
-    expect(weekRange(NOW, -1).start).toBe('2026-09-07')
-    expect(weekRange(NOW, 1).start).toBe('2026-09-21')
+    expect(weekRange(NOW, -1, 1).start).toBe('2026-09-07')
+    expect(weekRange(NOW, 1, 1).start).toBe('2026-09-21')
   })
 
   it('collapses the label when month and year are shared', () => {
-    expect(weekRange(NOW, 0).label).toBe('14–20 Sep 2026')
+    expect(weekRange(NOW, 0, 1).label).toBe('14–20 Sep 2026')
     // Crossing a month keeps both month names…
-    expect(weekRange(NOW, 2).label).toBe('28 Sep – 4 Oct 2026')
+    expect(weekRange(NOW, 2, 1).label).toBe('28 Sep – 4 Oct 2026')
     // …and crossing a year keeps both years.
-    expect(weekRange(new Date('2025-12-31T12:00:00+08:00'), 0).label).toBe(
+    expect(weekRange(new Date('2025-12-31T12:00:00+08:00'), 0, 1).label).toBe(
       '29 Dec 2025 – 4 Jan 2026',
     )
   })
@@ -68,7 +72,7 @@ describe('buildReview', () => {
     expect(t.completedAt).toBe('2026-09-13T23:00:00.000Z')
     expect(t.completedAt!.slice(0, 10)).toBe('2026-09-13')
 
-    const week = weekRange(NOW, 0)
+    const week = weekRange(NOW, 0, 1)
     const data = buildReview([t], [], week)
     expect(data.taskCount).toBe(1)
     expect(data.byDay).toHaveLength(1)
@@ -77,7 +81,7 @@ describe('buildReview', () => {
   })
 
   it('keeps only done tasks that carry a completedAt inside the week', () => {
-    const week = weekRange(NOW, 0)
+    const week = weekRange(NOW, 0, 1)
     const inWeek = doneAt('In week', '2026-09-15T10:00:00+08:00')
     const lastWeek = doneAt('Last week', '2026-09-10T10:00:00+08:00')
     const open: Task = { ...doneAt('Still open', '2026-09-15T10:00:00+08:00'), status: 'todo' }
@@ -91,7 +95,7 @@ describe('buildReview', () => {
   })
 
   it('orders days chronologically and items by completion time', () => {
-    const week = weekRange(NOW, 0)
+    const week = weekRange(NOW, 0, 1)
     const data = buildReview(
       [
         doneAt('Tuesday second', '2026-09-15T16:00:00+08:00'),
@@ -106,7 +110,7 @@ describe('buildReview', () => {
   })
 
   it('groups by project alphabetically with the untagged bucket last', () => {
-    const week = weekRange(NOW, 0)
+    const week = weekRange(NOW, 0, 1)
     const data = buildReview(
       [
         doneAt('Loose end', '2026-09-15T09:00:00+08:00'),
@@ -120,7 +124,7 @@ describe('buildReview', () => {
   })
 
   it('includes only events inside the week, date then time', () => {
-    const week = weekRange(NOW, 0)
+    const week = weekRange(NOW, 0, 1)
     const data = buildReview(
       [],
       [
@@ -136,7 +140,7 @@ describe('buildReview', () => {
 })
 
 describe('reviewToMarkdown', () => {
-  const week = weekRange(NOW, 0)
+  const week = weekRange(NOW, 0, 1)
   const tasks = [
     doneAt('Ship the quarterly report', '2026-09-14T09:00:00+08:00', 'reporting'),
     doneAt('Loose end', '2026-09-15T09:00:00+08:00'),
@@ -175,7 +179,7 @@ describe('reviewToMarkdown', () => {
   })
 
   it('says so plainly when the week was empty', () => {
-    const empty = weekRange(NOW, -4)
+    const empty = weekRange(NOW, -4, 1)
     const md = reviewToMarkdown(buildReview(tasks, events, empty), empty, {
       groupBy: 'day',
       includeEvents: true,

@@ -40,8 +40,8 @@ export interface Metrics {
   overdue: number
 }
 
-export function metrics(tasks: Task[], now: Date): Metrics {
-  const weekStart = startOfWeek(now, { weekStartsOn: 1 })
+export function metrics(tasks: Task[], now: Date, weekStartsOn: 0 | 1): Metrics {
+  const weekStart = startOfWeek(now, { weekStartsOn })
   return {
     open: tasks.filter((t) => t.status !== 'done').length,
     doneThisWeek: tasks.filter(

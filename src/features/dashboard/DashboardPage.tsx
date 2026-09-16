@@ -13,9 +13,10 @@ export function DashboardPage() {
   const tasks = useAppStore((s) => s.tasks)
   const notesCount = useAppStore((s) => s.notes.length)
   const openRestorePrompt = useUiStore((s) => s.openRestorePrompt)
+  const weekStartsOn = useAppStore((s) => s.settings.weekStartsOn)
   const now = useNow()
   const buckets = useMemo(() => taskBuckets(tasks, now), [tasks, now])
-  const m = useMemo(() => metrics(tasks, now), [tasks, now])
+  const m = useMemo(() => metrics(tasks, now, weekStartsOn), [tasks, now, weekStartsOn])
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4">
       <MetricTiles metrics={m} />

@@ -17,6 +17,11 @@ describe('runMigrations', () => {
     expect(out.bookmarkGroups).toEqual([])
   })
 
+  it('moves v3 data onto a Sunday week start', () => {
+    const out = runMigrations({ settings: { ...defaultSettings(), weekStartsOn: 1 } }, 3)
+    expect(out.settings.weekStartsOn).toBe(0)
+  })
+
   it('returns complete data for empty input', () => {
     expect(runMigrations({}, 1)).toEqual(defaultAppData())
   })

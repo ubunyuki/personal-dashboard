@@ -9,7 +9,7 @@ import { useAppStore } from '../../store/appStore'
 import { compareDue } from '../../store/selectors'
 import { useUiStore } from '../../store/uiStore'
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const prioDot: Record<TaskPriority, string> = {
   high: 'bg-red-500',
   medium: 'bg-amber-500',
@@ -27,6 +27,7 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
   const openTaskEditor = useUiStore((s) => s.openTaskEditor)
   const tasks = useAppStore((s) => s.tasks)
   const events = useAppStore((s) => s.events)
+  const weekStartsOn = useAppStore((s) => s.settings.weekStartsOn)
   const addEvent = useAppStore((s) => s.addEvent)
   const deleteEvent = useAppStore((s) => s.deleteEvent)
   const now = useNow(60_000)
@@ -48,7 +49,15 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [closeCalendar])
 
-  const grid = useMemo(() => buildMonthGrid(view.year, view.month), [view])
+  const grid = useMemo(
+    () => buildMonthGrid(view.year, view.month, weekStartsOn),
+    [view, weekStartsOn],
+  )
+  // Header labels rotate in lockstep with the grid.
+  const weekdays = useMemo(
+    () => [...WEEKDAYS.slice(weekStartsOn), ...WEEKDAYS.slice(0, weekStartsOn)],
+    [weekStartsOn],
+  )
   const markers = useMemo(() => {
     const m = new Map<string, { tasks: number; events: number }>()
     for (const t of tasks) {
@@ -115,7 +124,7 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
           </button>
         </header>
         <div className="grid grid-cols-7 gap-0.5">
-          {WEEKDAYS.map((d) => (
+          {weekdays.map((d) => (
             <span key={d} className="pb-1 text-center text-[10px] font-medium text-slate-400 dark:text-slate-500">
               {d}
             </span>

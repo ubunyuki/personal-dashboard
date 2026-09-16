@@ -20,7 +20,7 @@ describe('dueBucketOf', () => {
 
 describe('buildMonthGrid', () => {
   it('always yields 42 contiguous cells starting on a Monday', () => {
-    const grid = buildMonthGrid(2026, 8) // September 2026
+    const grid = buildMonthGrid(2026, 8, 1) // September 2026
     expect(grid).toHaveLength(42)
     expect(grid[0].date).toBe('2026-08-31') // Monday before Tue 1 Sep
     expect(new Date(2026, 7, 31).getDay()).toBe(1)
@@ -29,8 +29,15 @@ describe('buildMonthGrid', () => {
     }
   })
 
+  it('starts the week on Sunday when asked', () => {
+    const grid = buildMonthGrid(2026, 8, 0) // September 2026
+    expect(grid).toHaveLength(42)
+    expect(grid[0].date).toBe('2026-08-30') // Sunday before Tue 1 Sep
+    expect(new Date(2026, 7, 30).getDay()).toBe(0)
+  })
+
   it('crosses the year boundary correctly', () => {
-    const grid = buildMonthGrid(2027, 0) // January 2027 starts on a Friday
+    const grid = buildMonthGrid(2027, 0, 1) // January 2027 starts on a Friday
     expect(grid[0].date).toBe('2026-12-28')
     expect(grid[0].inMonth).toBe(false)
     expect(grid.find((c) => c.date === '2027-01-01')?.inMonth).toBe(true)
@@ -38,7 +45,7 @@ describe('buildMonthGrid', () => {
   })
 
   it('marks out-of-month cells', () => {
-    const grid = buildMonthGrid(2026, 8)
+    const grid = buildMonthGrid(2026, 8, 1)
     expect(grid.filter((c) => c.inMonth)).toHaveLength(30)
   })
 })

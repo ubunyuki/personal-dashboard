@@ -20,7 +20,7 @@ function rangeLabel(start: Date, end: Date): string {
 }
 
 /** `offset` is in weeks: 0 = the week containing `now`, -1 = the one before. */
-export function weekRange(now: Date, offset: number, weekStartsOn: 0 | 1 = 1): ReviewWeek {
+export function weekRange(now: Date, offset: number, weekStartsOn: 0 | 1): ReviewWeek {
   const start = startOfWeek(addDays(now, offset * 7), { weekStartsOn })
   const end = addDays(start, 6)
   return { start: toLocalDate(start), end: toLocalDate(end), label: rangeLabel(start, end) }

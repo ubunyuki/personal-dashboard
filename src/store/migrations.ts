@@ -10,7 +10,7 @@ export function defaultSettings(): Settings {
       unit: 'celsius',
       labelStyle: 'name',
     },
-    weekStartsOn: 1,
+    weekStartsOn: 0,
   }
 }
 
@@ -34,6 +34,9 @@ const steps: Record<number, (d: Partial<PersistedAppData>) => Partial<PersistedA
   1: (d) => d,
   // v2 → v3: bookmarks + bookmarkGroups collections added; the defaults spread fills them.
   2: (d) => d,
+  // v3 → v4: the week starts on Sunday for EVERYONE, not just new installs, so
+  // this rewrites the stored value instead of leaving existing users on Monday.
+  3: (d) => (d.settings ? { ...d, settings: { ...d.settings, weekStartsOn: 0 } } : d),
 }
 
 /**

@@ -5,7 +5,7 @@
  * - date: LOCAL calendar string 'yyyy-MM-dd'; time: 'HH:mm' (24h).
  *   Parse with date-fns, never `new Date('yyyy-MM-dd')` (that is UTC midnight).
  */
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 4
 
 export type TaskStatus = 'todo' | 'in-progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
@@ -130,7 +130,9 @@ export interface WeatherSettings {
 export interface Settings {
   theme: 'system' | 'light' | 'dark'
   weather: WeatherSettings
-  weekStartsOn: 1
+  /** 0 = Sunday, 1 = Monday. Threaded into every week calculation — never
+   *  hardcode it, or the dashboard and the review drawer can disagree. */
+  weekStartsOn: 0 | 1
 }
 
 /** Exactly what zustand persist writes (partialize output). */

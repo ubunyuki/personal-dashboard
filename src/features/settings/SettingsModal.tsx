@@ -22,6 +22,7 @@ export function SettingsModal() {
   const close = useUiStore((s) => s.closeSettings)
   const persisted = useUiStore((s) => s.storagePersisted)
   const theme = useAppStore((s) => s.settings.theme)
+  const weekStartsOn = useAppStore((s) => s.settings.weekStartsOn)
   const updateSettings = useAppStore((s) => s.updateSettings)
   return (
     <Modal title="Settings" onClose={close}>
@@ -38,6 +39,18 @@ export function SettingsModal() {
             <option value="system">Follow system</option>
             <option value="light">Light</option>
             <option value="dark">Dark</option>
+          </select>
+        </Field>
+        <Field label="Week starts on">
+          <select
+            className={inputCls}
+            value={weekStartsOn}
+            onChange={(e) =>
+              updateSettings({ weekStartsOn: Number(e.target.value) as Settings['weekStartsOn'] })
+            }
+          >
+            <option value={0}>Sunday</option>
+            <option value={1}>Monday</option>
           </select>
         </Field>
       </Section>
