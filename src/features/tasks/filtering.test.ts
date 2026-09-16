@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Task } from '../../types'
+import { projectsOf } from '../../lib/tasks/projectTags'
 import { applyTaskView, type TaskView } from './filtering'
 
 const NOW = new Date(2026, 8, 15, 12, 0) // local 2026-09-15 12:00
@@ -30,10 +31,15 @@ const base: TaskView = {
 
 describe('applyTaskView', () => {
   const tasks = [
-    task({ status: 'done', priority: 'low', project: 'site' }),
+    task({ status: 'done', priority: 'low', projects: ['site'] }),
     task({ status: 'todo', priority: 'high', dueDate: '2026-09-14' }), // overdue
-    task({ status: 'in-progress', priority: 'medium', dueDate: '2026-09-15', project: 'site' }),
-    task({ status: 'todo', priority: 'low', dueDate: '2026-09-18', project: 'report' }),
+    task({
+      status: 'in-progress',
+      priority: 'medium',
+      dueDate: '2026-09-15',
+      projects: ['site', 'report'],
+    }),
+    task({ status: 'todo', priority: 'low', dueDate: '2026-09-18', projects: ['report'] }),
     task({ status: 'todo', priority: 'high' }), // no date, untagged
   ]
 
@@ -47,8 +53,14 @@ describe('applyTaskView', () => {
   it('filters by project, including the untagged sentinel', () => {
     expect(applyTaskView(tasks, { ...base, project: 'site' }, NOW)).toHaveLength(2)
     const untagged = applyTaskView(tasks, { ...base, project: 'untagged' }, NOW)
-    expect(untagged.every((t) => t.project === undefined)).toBe(true)
+    expect(untagged.every((t) => projectsOf(t).length === 0)).toBe(true)
     expect(untagged).toHaveLength(2)
+  })
+
+  it('matches a task on ANY of its tags, not just the first', () => {
+    // The in-progress task carries both site and report.
+    const byReport = applyTaskView(tasks, { ...base, project: 'report' }, NOW)
+    expect(byReport.map((t) => t.status)).toEqual(['in-progress', 'todo'])
   })
 
   it('sorts dated tasks chronologically before undated, tiebreaking on priority', () => {

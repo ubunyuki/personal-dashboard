@@ -2,6 +2,11 @@ import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Drawer } from '../../components/ui/Drawer'
 import { Field, inputCls } from '../../components/ui/Field'
+import {
+  allProjectTags,
+  formatProjectTags,
+  parseProjectTags,
+} from '../../lib/tasks/projectTags'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 import type { TaskPriority, TaskStatus } from '../../types'
@@ -22,10 +27,16 @@ export function TaskEditor() {
   const [priority, setPriority] = useState<TaskPriority>(task?.priority ?? 'medium')
   const [dueDate, setDueDate] = useState(task?.dueDate ?? '')
   const [dueTime, setDueTime] = useState(task?.dueTime ?? '')
-  const [project, setProject] = useState(task?.project ?? '')
+  const [project, setProject] = useState(formatProjectTags(task?.projects))
 
   if (!editing) return null
   if (editing !== 'new' && !task) return null
+
+  const head = project.slice(0, project.lastIndexOf(',') + 1)
+  const already = new Set((parseProjectTags(head) ?? []).map((p) => p.toLowerCase()))
+  const tagSuggestions = allProjectTags(tasks)
+    .filter((tag) => !already.has(tag.toLowerCase()))
+    .map((tag) => (head ? `${head} ${tag}` : tag))
 
   const save = () => {
     const fields = {
@@ -35,7 +46,7 @@ export function TaskEditor() {
       priority,
       dueDate: dueDate || undefined,
       dueTime: dueDate && dueTime ? dueTime : undefined,
-      project: project.trim() || undefined,
+      projects: parseProjectTags(project),
     }
     if (!fields.title) return
     if (editing === 'new') addTask(fields)
@@ -118,22 +129,22 @@ export function TaskEditor() {
             />
           </Field>
         </div>
-        <Field label="Project tag">
+        <Field label="Project tags">
           <input
             className={inputCls}
             value={project}
             onChange={(e) => setProject(e.target.value)}
-            placeholder="e.g. website-revamp"
+            placeholder="e.g. website-revamp, q4-budget"
             list="project-tag-options"
           />
         </Field>
-        {/* Existing tags as suggestions — free text still allowed. */}
+        {/* Existing tags as suggestions — free text still allowed. Picking an
+            option replaces the WHOLE field, so each one carries the tags
+            already typed and only completes the segment after the last comma. */}
         <datalist id="project-tag-options">
-          {[...new Set(tasks.map((t) => t.project).filter((p): p is string => !!p))]
-            .sort()
-            .map((name) => (
-              <option key={name} value={name} />
-            ))}
+          {tagSuggestions.map((value) => (
+            <option key={value} value={value} />
+          ))}
         </datalist>
         <div className="mt-auto flex items-center gap-2 pt-2">
           <Button variant="primary" type="submit" disabled={!title.trim()}>

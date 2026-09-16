@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ProjectMeta, Task } from '../../types'
+import { projectsOf } from '../../lib/tasks/projectTags'
 import {
   clearProjectIn,
   colorForProject,
@@ -13,7 +14,9 @@ import {
 const NOW = '2026-09-15T08:00:00.000Z'
 
 let n = 0
-function task(project: string | undefined, status: Task['status'] = 'todo'): Task {
+/** One tag, several, or none — the shorthand keeps the single-tag cases
+ *  reading the way they did before tags became a list. */
+function task(tags: string | string[] | undefined, status: Task['status'] = 'todo'): Task {
   n++
   return {
     id: `t${n}`,
@@ -21,11 +24,13 @@ function task(project: string | undefined, status: Task['status'] = 'todo'): Tas
     description: '',
     status,
     priority: 'medium',
-    project,
+    projects: tags === undefined ? undefined : typeof tags === 'string' ? [tags] : tags,
     createdAt: NOW,
     updatedAt: NOW,
   }
 }
+
+const tagsOf = (tasks: Task[], id: string) => projectsOf(tasks.find((t) => t.id === id)!)
 
 const meta = (rows: Array<Partial<ProjectMeta> & { name: string }>): ProjectMeta[] =>
   rows.map((r) => ({ updatedAt: NOW, ...r }))
@@ -47,6 +52,14 @@ describe('deriveProjects', () => {
     expect(zeta).toMatchObject({ open: 1, done: 1, total: 2 })
   })
 
+  it('counts a multi-tagged task once under each of its tags', () => {
+    const derived = deriveProjects([task(['site', 'ops']), task('ops', 'done')], [])
+    expect(derived).toEqual([
+      expect.objectContaining({ name: 'ops', open: 1, done: 1, total: 2 }),
+      expect.objectContaining({ name: 'site', open: 1, done: 0, total: 1 }),
+    ])
+  })
+
   it('ignores ghost meta rows whose tag has no tasks', () => {
     const derived = deriveProjects([task('real')], meta([{ name: 'ghost', color: 'rose' }]))
     expect(derived.map((p) => p.name)).toEqual(['real'])
@@ -58,6 +71,17 @@ describe('groupTasksByProject', () => {
     const all = [task('b'), task('a'), task(undefined)]
     const groups = groupTasksByProject(all, all, [])
     expect(groups.map((g) => g.project?.name ?? null)).toEqual(['a', 'b', null])
+  })
+
+  it('lists a multi-tagged task in every one of its sections', () => {
+    const shared = task(['a', 'b'])
+    const all = [shared, task('b'), task(undefined)]
+    const groups = groupTasksByProject(all, all, [])
+    expect(groups.map((g) => g.project?.name ?? null)).toEqual(['a', 'b', null])
+    expect(groups[0].tasks).toEqual([shared])
+    expect(groups[1].tasks.map((t) => t.id)).toEqual([shared.id, all[1].id])
+    // …and it is not ALSO untagged.
+    expect(groups[2].tasks).toEqual([all[2]])
   })
 
   it('drops sections with no visible tasks but keeps full-project counts', () => {
@@ -73,8 +97,8 @@ describe('renameProjectIn', () => {
     const tasks = [task('old'), task('old'), task('other')]
     const m = meta([{ name: 'old', color: 'violet' }])
     const r = renameProjectIn(tasks, m, 'old', ' new ', NOW)
-    expect(r.tasks.filter((t) => t.project === 'new')).toHaveLength(2)
-    expect(r.tasks.filter((t) => t.project === 'old')).toHaveLength(0)
+    expect(r.tasks.filter((t) => projectsOf(t).includes('new'))).toHaveLength(2)
+    expect(r.tasks.filter((t) => projectsOf(t).includes('old'))).toHaveLength(0)
     expect(r.projectMeta).toEqual([{ name: 'new', color: 'violet', updatedAt: NOW }])
   })
 
@@ -85,8 +109,20 @@ describe('renameProjectIn', () => {
       { name: 'b', color: 'sky' },
     ])
     const r = renameProjectIn(tasks, m, 'a', 'b', NOW)
-    expect(r.tasks.every((t) => t.project === 'b')).toBe(true)
+    expect(r.tasks.every((t) => projectsOf(t).includes('b'))).toBe(true)
     expect(r.projectMeta).toEqual([{ name: 'b', color: 'sky', updatedAt: NOW }])
+  })
+
+  it('renaming onto a tag the task already carries collapses the duplicate', () => {
+    const tasks = [task(['a', 'b'])]
+    const r = renameProjectIn(tasks, [], 'a', 'b', NOW)
+    expect(tagsOf(r.tasks, tasks[0].id)).toEqual(['b'])
+  })
+
+  it('leaves the other tags on the task alone', () => {
+    const tasks = [task(['old', 'keep'])]
+    const r = renameProjectIn(tasks, [], 'old', 'new', NOW)
+    expect(tagsOf(r.tasks, tasks[0].id)).toEqual(['new', 'keep'])
   })
 
   it('no-ops on empty, identical, or unknown names (same references back)', () => {
@@ -135,8 +171,14 @@ describe('setProjectColorIn / clearProjectIn', () => {
   it('clearProjectIn untags members and drops the meta row', () => {
     const tasks = [task('a'), task('b')]
     const r = clearProjectIn(tasks, meta([{ name: 'a', color: 'rose' }]), 'a', NOW)
-    expect(r.tasks.find((t) => t.id === tasks[0].id)?.project).toBeUndefined()
-    expect(r.tasks.find((t) => t.id === tasks[1].id)?.project).toBe('b')
+    expect(r.tasks.find((t) => t.id === tasks[0].id)?.projects).toBeUndefined()
+    expect(tagsOf(r.tasks, tasks[1].id)).toEqual(['b'])
     expect(r.projectMeta).toEqual([])
+  })
+
+  it('clearProjectIn removes only that tag, so the task keeps the others', () => {
+    const tasks = [task(['a', 'b'])]
+    const r = clearProjectIn(tasks, meta([{ name: 'a' }]), 'a', NOW)
+    expect(tagsOf(r.tasks, tasks[0].id)).toEqual(['b'])
   })
 })

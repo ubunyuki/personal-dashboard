@@ -1,4 +1,5 @@
 import type { Task, TaskPriority, TaskStatus } from '../../types'
+import { projectsOf } from '../../lib/tasks/projectTags'
 import { dueBucketOf, type DueBucket } from '../../lib/dates/dates'
 import { compareDue, comparePriority } from '../../store/selectors'
 
@@ -26,8 +27,8 @@ export function applyTaskView(tasks: Task[], view: TaskView, now: Date): Task[] 
     if (view.priority !== 'all' && t.priority !== view.priority) return false
     if (view.due !== 'all' && dueBucketOf(t, now) !== view.due) return false
     if (view.project === 'untagged') {
-      if (t.project !== undefined) return false
-    } else if (view.project !== 'all' && t.project !== view.project) {
+      if (projectsOf(t).length > 0) return false
+    } else if (view.project !== 'all' && !projectsOf(t).includes(view.project)) {
       return false
     }
     return true

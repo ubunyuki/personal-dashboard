@@ -4,6 +4,7 @@ import { formatDueLabel, isTaskOverdue } from '../../lib/dates/dates'
 import { tintChipCls } from '../../components/ui/swatches'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
+import { projectsOf } from '../../lib/tasks/projectTags'
 import { colorForProject } from './projects'
 import { priorityMeta, statusMeta } from './meta'
 
@@ -41,17 +42,18 @@ export function TaskRow({ task, now }: { task: Task; now: Date }) {
           <p className="truncate text-xs text-slate-400 dark:text-slate-500">{task.description}</p>
         )}
       </div>
-      {task.project && (
+      {/* Every tag, uncapped: the chips are sm:-only and the title beside them
+          has min-w-0 flex-1, so a heavily tagged row truncates rather than wraps. */}
+      {projectsOf(task).map((name) => (
         <span
+          key={name}
           className={`hidden rounded-md px-1.5 py-0.5 text-[11px] sm:inline ${
-            tintChipCls[
-              colorForProject(task.project, projectMeta.find((m) => m.name === task.project))
-            ]
+            tintChipCls[colorForProject(name, projectMeta.find((m) => m.name === name))]
           }`}
         >
-          #{task.project}
+          #{name}
         </span>
-      )}
+      ))}
       <span className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${priorityMeta[task.priority].badge}`}>
         {priorityMeta[task.priority].label}
       </span>

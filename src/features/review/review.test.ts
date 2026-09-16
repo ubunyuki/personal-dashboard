@@ -11,7 +11,7 @@ let n = 0
  * way the app stores it — nowIso() is new Date().toISOString(), so completedAt
  * is always a Z-suffixed UTC instant. That gap is the whole point of these tests.
  */
-const doneAt = (title: string, local: string, project?: string): Task => {
+const doneAt = (title: string, local: string, ...projects: string[]): Task => {
   const completedAt = new Date(local).toISOString()
   return {
     id: `t${++n}`,
@@ -19,7 +19,7 @@ const doneAt = (title: string, local: string, project?: string): Task => {
     description: '',
     status: 'done',
     priority: 'medium',
-    project,
+    projects: projects.length > 0 ? projects : undefined,
     completedAt,
     createdAt: '2026-09-01T00:00:00.000Z',
     updatedAt: completedAt,
@@ -123,6 +123,19 @@ describe('buildReview', () => {
     expect(data.byProject.map((g) => g.project)).toEqual(['design', 'reporting', null])
   })
 
+  it('lists a multi-tagged task under every one of its projects', () => {
+    const week = weekRange(NOW, 0, 1)
+    const data = buildReview(
+      [doneAt('Ship it', '2026-09-15T10:00:00+08:00', 'reporting', 'design')],
+      [],
+      week,
+    )
+    expect(data.byProject.map((g) => g.project)).toEqual(['design', 'reporting'])
+    expect(data.byProject.every((g) => g.items[0].title === 'Ship it')).toBe(true)
+    // Counted once overall, though it appears in two sections.
+    expect(data.taskCount).toBe(1)
+  })
+
   it('includes only events inside the week, date then time', () => {
     const week = weekRange(NOW, 0, 1)
     const data = buildReview(
@@ -165,6 +178,19 @@ describe('reviewToMarkdown', () => {
         '_2 tasks completed_',
       ].join('\n'),
     )
+  })
+
+  it('puts every tag on the day bullet, and the item under every heading', () => {
+    const multi = [doneAt('Ship it', '2026-09-14T09:00:00+08:00', 'reporting', 'design')]
+    const data = buildReview(multi, [], week)
+    expect(reviewToMarkdown(data, week, { groupBy: 'day', includeEvents: false })).toContain(
+      '- Ship it  `#reporting` `#design`',
+    )
+    const byProject = reviewToMarkdown(data, week, { groupBy: 'project', includeEvents: false })
+    expect(byProject).toContain('### #design\n- Ship it')
+    expect(byProject).toContain('### #reporting\n- Ship it')
+    // Two sections, but still one completed task in the tally.
+    expect(byProject.endsWith('_1 task completed_')).toBe(true)
   })
 
   it('renders project headings with the day moved onto the bullet', () => {

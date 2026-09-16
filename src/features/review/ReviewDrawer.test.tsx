@@ -11,8 +11,8 @@ import { useAppStore } from '../../store/appStore'
  * completed at the real "now", so it always falls inside the current week.
  */
 describe('ReviewDrawer', () => {
-  const seedCompleted = (title: string, project?: string) => () => {
-    const task = useAppStore.getState().addTask({ title, project })
+  const seedCompleted = (title: string, ...projects: string[]) => () => {
+    const task = useAppStore.getState().addTask({ title, projects })
     useAppStore.getState().updateTask(task.id, { status: 'done' })
   }
 

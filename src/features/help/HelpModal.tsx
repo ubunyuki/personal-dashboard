@@ -158,7 +158,10 @@ export function HelpModal() {
         <div className="grid gap-3 sm:grid-cols-2">
           <HelpCard icon={ListTodo} title="Tasks & projects">
             <ul className="flex flex-col gap-1">
-              <Li>Tag tasks with a project in the editor — tags become coloured chips</Li>
+              <Li>
+                Tag tasks in the editor, separating several with commas — tags become coloured
+                chips, and a task appears under every project it carries
+              </Li>
               <Li>Click a chip to filter; the layers button groups tasks by project</Li>
               <Li>Rename, recolour or reorder a project from its section header</Li>
             </ul>

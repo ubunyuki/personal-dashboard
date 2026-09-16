@@ -5,6 +5,7 @@ import { Card } from '../../components/ui/Card'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { inputCls } from '../../components/ui/Field'
 import { useNow } from '../../lib/useNow'
+import { projectsOf } from '../../lib/tasks/projectTags'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 import { applyTaskView, type StatusFilter, type TaskView } from './filtering'
@@ -54,7 +55,7 @@ export function TasksPage() {
     [effectiveView.group, visible, tasks, projectMeta],
   )
   const untaggedOpen = useMemo(
-    () => tasks.filter((t) => !t.project && t.status !== 'done').length,
+    () => tasks.filter((t) => projectsOf(t).length === 0 && t.status !== 'done').length,
     [tasks],
   )
   const counts = useMemo<Record<StatusFilter, number>>(

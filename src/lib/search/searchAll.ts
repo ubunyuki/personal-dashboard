@@ -1,6 +1,7 @@
 import type { Bookmark, CalEvent, Note, Task } from '../../types'
 import type { Tab } from '../../store/uiStore'
 import { domainOf } from '../bookmarks/url'
+import { projectsOf } from '../tasks/projectTags'
 import { formatDueLabel } from '../dates/dates'
 import { fuzzyMatch } from './match'
 import { COMMANDS, type CommandDef, type CommandId } from './commands'
@@ -64,6 +65,12 @@ const noteTitle = (n: Note): string => n.text.split('\n', 1)[0]
 /** domainOf returns null for unparseable URLs; every field here is optional. */
 const domain = (url: string): string | undefined => domainOf(url) ?? undefined
 
+/** All of a task's tags on the secondary line: "#site #report". */
+const tagDetail = (t: Task): string | undefined => {
+  const tags = projectsOf(t)
+  return tags.length > 0 ? tags.map((p) => `#${p}`).join(' ') : undefined
+}
+
 function searchKind<T>(
   items: T[],
   toResult: (item: T) => SearchResult | null,
@@ -101,7 +108,7 @@ export function searchAll(
         kind: 'task',
         id: t.id,
         title: t.title,
-        detail: t.project ? `#${t.project}` : undefined,
+        detail: tagDetail(t),
         score: 0,
         action: { type: 'open-task', id: t.id },
         u: t.updatedAt,
@@ -167,7 +174,7 @@ export function searchAll(
       const m = best(q, [
         { text: t.title, weight: 1, primary: true },
         { text: t.description, weight: 0.6 },
-        { text: t.project, weight: 0.8 },
+        { text: projectsOf(t).join(' '), weight: 0.8 },
       ])
       if (!m) return null
       const doneFactor = t.status === 'done' ? 0.6 : 1
@@ -175,7 +182,7 @@ export function searchAll(
         kind: 'task',
         id: t.id,
         title: t.title,
-        detail: t.project ? `#${t.project}` : undefined,
+        detail: tagDetail(t),
         ...m,
         score: m.score * doneFactor,
         action: { type: 'open-task', id: t.id },

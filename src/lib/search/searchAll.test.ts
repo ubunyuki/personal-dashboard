@@ -86,6 +86,13 @@ describe('searchAll', () => {
     })
   })
 
+  it('matches a task on any of its tags and shows them all as the detail', () => {
+    const d = data({ tasks: [task('Ship it', { projects: ['reporting', 'design'] })] })
+    // The SECOND tag finds it, which a single-field match could not do.
+    const hit = searchAll('design', d).find((r) => r.kind === 'task')
+    expect(hit?.detail).toBe('#reporting #design')
+  })
+
   it('typing a date string finds the day via its events', () => {
     const d = data({ events: [event('Standup', '2026-09-18')] })
     const hit = searchAll('2026-09-18', d).find((r) => r.kind === 'event')

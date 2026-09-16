@@ -5,7 +5,7 @@
  * - date: LOCAL calendar string 'yyyy-MM-dd'; time: 'HH:mm' (24h).
  *   Parse with date-fns, never `new Date('yyyy-MM-dd')` (that is UTC midnight).
  */
-export const SCHEMA_VERSION = 4
+export const SCHEMA_VERSION = 5
 
 export type TaskStatus = 'todo' | 'in-progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
@@ -18,8 +18,9 @@ export interface Task {
   priority: TaskPriority
   dueDate?: string
   dueTime?: string
-  /** Free-text tag; a future Projects page groups on this. */
-  project?: string
+  /** Free-text tags, comma-separated in the editor. A task appears under
+   *  EVERY tag it carries; read them through projectsOf, never directly. */
+  projects?: string[]
   /** Set when the task was created by converting a note. */
   sourceNoteId?: string
   createdAt: string
@@ -102,7 +103,7 @@ export interface Bookmark {
  * `?? 'name'` everywhere. Top-level absent key: safe. Nested: not.
  */
 export interface ProjectMeta {
-  /** Matches Task.project exactly (trimmed). */
+  /** Matches a Task.projects entry exactly (trimmed). */
   name: string
   /** undefined = derived from a hash of the name. */
   color?: GroupColor

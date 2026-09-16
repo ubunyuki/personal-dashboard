@@ -31,6 +31,29 @@ describe('TaskEditor', () => {
     expect(useUiStore.getState().editingTask).toBeNull()
   })
 
+  it('splits the tag field on commas and round-trips it back in', async () => {
+    const user = userEvent.setup()
+    resetStores()
+    let view = openEditor('new')
+
+    await user.type(screen.getByLabelText('Title'), 'Tagged twice')
+    await user.type(screen.getByLabelText('Project tags'), ' reporting , design , Design ')
+    await user.click(screen.getByRole('button', { name: 'Add task' }))
+
+    // Trimmed, and the case-only duplicate is dropped rather than stored twice.
+    const task = useAppStore.getState().tasks[0]
+    expect(task?.projects).toEqual(['reporting', 'design'])
+    view.unmount()
+
+    // Reopening shows the stored tags as the field the user would have typed.
+    view = openEditor(task.id)
+    expect(screen.getByLabelText('Project tags')).toHaveValue('reporting, design')
+    await user.clear(screen.getByLabelText('Project tags'))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+    expect(useAppStore.getState().tasks[0]?.projects).toBeUndefined()
+    view.unmount()
+  })
+
   it('sets completedAt on done and clears it on un-done', async () => {
     const user = userEvent.setup()
     resetStores()

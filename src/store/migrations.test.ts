@@ -22,6 +22,20 @@ describe('runMigrations', () => {
     expect(out.settings.weekStartsOn).toBe(0)
   })
 
+  it('turns a v4 single project tag into a list and drops the old key', () => {
+    const out = runMigrations(
+      { tasks: [{ id: 't1', title: 'Ship it', project: '  reporting  ' }] },
+      4,
+    )
+    expect(out.tasks[0]).toMatchObject({ id: 't1', projects: ['reporting'] })
+    expect(out.tasks[0]).not.toHaveProperty('project')
+  })
+
+  it('leaves a v4 task with no usable tag untagged', () => {
+    const out = runMigrations({ tasks: [{ id: 't1' }, { id: 't2', project: '   ' }] }, 4)
+    expect(out.tasks.every((t) => t.projects === undefined)).toBe(true)
+  })
+
   it('returns complete data for empty input', () => {
     expect(runMigrations({}, 1)).toEqual(defaultAppData())
   })

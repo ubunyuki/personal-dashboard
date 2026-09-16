@@ -14,6 +14,7 @@ import {
   type WeatherSettings,
 } from '../types'
 import { newId, nowIso } from '../lib/id'
+import { normalizeProjectTags } from '../lib/tasks/projectTags'
 import { domainOf, normalizeUrl } from '../lib/bookmarks/url'
 import { splitNoteForTask } from '../lib/notes/splitNoteForTask'
 import { moveNoteIn } from '../features/notes/ordering'
@@ -71,7 +72,8 @@ export type AppStore = PersistedAppData & {
   setProjectColor: (name: string, color: GroupColor | undefined) => void
   /** Swap with the neighbour in derived order (delta -1 = up, +1 = down). */
   moveProject: (name: string, delta: -1 | 1) => void
-  /** Members become untagged; the project disappears (it was only its tag). */
+  /** The tag comes off every member (their other tags stay); the project
+   *  disappears, because it was only ever its tag. */
   clearProject: (name: string) => void
   /** Restore path: replaces all persisted data via merge-set (replace-mode would strip actions). */
   replaceAll: (data: PersistedAppData) => void
@@ -118,7 +120,7 @@ export const useAppStore = create<AppStore>()(
           priority: input.priority ?? 'medium',
           dueDate: input.dueDate || undefined,
           dueTime: input.dueTime || undefined,
-          project: input.project?.trim() || undefined,
+          projects: normalizeProjectTags(input.projects ?? []),
           sourceNoteId: input.sourceNoteId,
           createdAt: now,
           updatedAt: now,

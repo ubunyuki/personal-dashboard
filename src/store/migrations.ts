@@ -1,4 +1,5 @@
-import { SCHEMA_VERSION, type PersistedAppData, type Settings } from '../types'
+import { SCHEMA_VERSION, type PersistedAppData, type Settings, type Task } from '../types'
+import { normalizeProjectTags } from '../lib/tasks/projectTags'
 
 export function defaultSettings(): Settings {
   return {
@@ -38,6 +39,19 @@ const steps: Record<number, (d: Partial<PersistedAppData>) => Partial<PersistedA
   // v3 → v4: the week starts on Sunday for EVERYONE, not just new installs, so
   // this rewrites the stored value instead of leaving existing users on Monday.
   3: (d) => (d.settings ? { ...d, settings: { ...d.settings, weekStartsOn: 0 } } : d),
+  // v4 → v5: one project tag per task becomes a list. The old key is dropped
+  // rather than left behind, so nothing can read a stale single tag later.
+  4: (d) => {
+    if (!Array.isArray(d.tasks)) return d
+    return {
+      ...d,
+      tasks: d.tasks.map((t) => {
+        const { project, ...rest } = t as Task & { project?: unknown }
+        const projects = normalizeProjectTags(typeof project === 'string' ? [project] : [])
+        return projects ? { ...rest, projects } : rest
+      }),
+    }
+  },
 }
 
 /**

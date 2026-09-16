@@ -139,11 +139,14 @@ export function ReviewDrawer() {
                     <Check size={13} className="shrink-0 translate-y-0.5 text-emerald-500" />
                     <span className="flex-1">{item.title}</span>
                     {groupBy === 'day'
-                      ? item.project && (
-                          <span className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
-                            #{item.project}
+                      ? (item.projects ?? []).map((p) => (
+                          <span
+                            key={p}
+                            className="shrink-0 text-xs text-slate-400 dark:text-slate-500"
+                          >
+                            #{p}
                           </span>
-                        )
+                        ))
                       : null}
                   </li>
                 ))}

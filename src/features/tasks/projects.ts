@@ -1,10 +1,16 @@
 import { GROUP_COLORS, type GroupColor, type ProjectMeta, type Task } from '../../types'
+import { projectsOf } from '../../lib/tasks/projectTags'
 
 /**
  * Projects are a VIEW of tasks: a project exists exactly while some task
- * carries its tag (task.project, trimmed). ProjectMeta rows only decorate —
- * colour and manual order — and rows whose tag no longer appears on any
- * task are ignored (harmless ghosts in storage, invisible in the UI).
+ * carries its tag (one of task.projects, trimmed). ProjectMeta rows only
+ * decorate — colour and manual order — and rows whose tag no longer appears
+ * on any task are ignored (harmless ghosts in storage, invisible in the UI).
+ *
+ * A task may carry several tags, and then it belongs to EVERY one of them:
+ * it is counted in each project's totals and listed in each project's
+ * section. Nothing here dedupes across projects, because the whole point of
+ * a second tag is to make the task show up in a second place.
  */
 
 /** Stable colour for an unconfigured project: djb2 hash into the palette,
@@ -34,11 +40,12 @@ const metaFor = (meta: ProjectMeta[], name: string): ProjectMeta | undefined =>
 export function deriveProjects(tasks: Task[], meta: ProjectMeta[]): ProjectSummary[] {
   const byName = new Map<string, { open: number; done: number }>()
   for (const t of tasks) {
-    if (!t.project) continue
-    const c = byName.get(t.project) ?? { open: 0, done: 0 }
-    if (t.status === 'done') c.done++
-    else c.open++
-    byName.set(t.project, c)
+    for (const name of projectsOf(t)) {
+      const c = byName.get(name) ?? { open: 0, done: 0 }
+      if (t.status === 'done') c.done++
+      else c.open++
+      byName.set(name, c)
+    }
   }
   const summaries = [...byName.entries()].map(([name, c]): ProjectSummary => {
     const m = metaFor(meta, name)
@@ -82,13 +89,17 @@ export function groupTasksByProject(
   const buckets = new Map<string, Task[]>()
   const untagged: Task[] = []
   for (const t of visible) {
-    if (!t.project) {
+    const tags = projectsOf(t)
+    if (tags.length === 0) {
       untagged.push(t)
       continue
     }
-    const list = buckets.get(t.project) ?? []
-    list.push(t)
-    buckets.set(t.project, list)
+    // Once per tag: a multi-tagged task is listed in each of its sections.
+    for (const name of tags) {
+      const list = buckets.get(name) ?? []
+      list.push(t)
+      buckets.set(name, list)
+    }
   }
   const groups: ProjectGroup[] = []
   for (const p of deriveProjects(allTasks, meta)) {
@@ -125,12 +136,17 @@ export function renameProjectIn(
 ): { tasks: Task[]; projectMeta: ProjectMeta[] } {
   const target = to.trim()
   if (!target || target === from) return { tasks, projectMeta: meta }
-  if (!tasks.some((t) => t.project === from) && !metaFor(meta, from)) {
+  if (!tasks.some((t) => projectsOf(t).includes(from)) && !metaFor(meta, from)) {
     return { tasks, projectMeta: meta }
   }
-  const nextTasks = tasks.map((t) =>
-    t.project === from ? { ...t, project: target, updatedAt: now } : t,
-  )
+  const nextTasks = tasks.map((t) => {
+    const tags = projectsOf(t)
+    if (!tags.includes(from)) return t
+    // Renaming onto a tag the task ALREADY carries collapses the two into one
+    // rather than leaving a duplicate chip on the row.
+    const renamed = [...new Set(tags.map((p) => (p === from ? target : p)))]
+    return { ...t, projects: renamed, updatedAt: now }
+  })
   const source = metaFor(meta, from)
   let nextMeta = meta.filter((m) => m.name !== from)
   if (!metaFor(nextMeta, target) && source) {
@@ -175,7 +191,8 @@ export function moveProjectIn(
   return next
 }
 
-/** Pure core of clearProject: members become untagged, the meta row goes. */
+/** Pure core of clearProject: the tag comes off every member — which only
+ *  leaves a task untagged if that was its last one — and the meta row goes. */
 export function clearProjectIn(
   tasks: Task[],
   meta: ProjectMeta[],
@@ -183,9 +200,14 @@ export function clearProjectIn(
   now: string,
 ): { tasks: Task[]; projectMeta: ProjectMeta[] } {
   return {
-    tasks: tasks.map((t) =>
-      t.project === name ? { ...t, project: undefined, updatedAt: now } : t,
-    ),
+    // Only THIS tag goes; a task's other projects keep it out of the
+    // untagged bucket.
+    tasks: tasks.map((t) => {
+      const tags = projectsOf(t)
+      if (!tags.includes(name)) return t
+      const rest = tags.filter((p) => p !== name)
+      return { ...t, projects: rest.length > 0 ? rest : undefined, updatedAt: now }
+    }),
     projectMeta: meta.filter((m) => m.name !== name),
   }
 }

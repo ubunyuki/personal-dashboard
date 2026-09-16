@@ -16,8 +16,9 @@ to a OneDrive folder.
   tasks, notes, bookmarks and events, plus a command runner for every
   navigation and action.
 - **Tasks & projects** — quick add, filters/sorts, editor (status, priority,
-  due date+time, project tag), status cycling on rows; group the board by
-  project, each with its own colour, renameable and reorderable.
+  due date+time, comma-separated project tags), status cycling on rows; group
+  the board by project, each with its own colour, renameable and reorderable.
+  A task with several tags shows up under every one of them.
 - **Weekly review** — the “Done this week” tile opens a drawer of what you
   finished, grouped by day or by project, with events and a one-click
   copy as standup-ready markdown.

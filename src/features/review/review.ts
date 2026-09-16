@@ -1,6 +1,7 @@
 import { addDays, format, parseISO, startOfWeek } from 'date-fns'
 import type { CalEvent, Task } from '../../types'
 import { DATE_FMT, parseLocalDate, toLocalDate } from '../../lib/dates/dates'
+import { projectsOf } from '../../lib/tasks/projectTags'
 
 export interface ReviewWeek {
   /** Local calendar bounds, inclusive, 'yyyy-MM-dd'. */
@@ -29,7 +30,8 @@ export function weekRange(now: Date, offset: number, weekStartsOn: 0 | 1): Revie
 export interface ReviewItem {
   id: string
   title: string
-  project?: string
+  /** Every tag the task carried; the item appears under each in byProject. */
+  projects?: string[]
   /** Local 'yyyy-MM-dd' the task was completed on. */
   day: string
 }
@@ -67,7 +69,11 @@ export function buildReview(tasks: Task[], events: CalEvent[], week: ReviewWeek)
     if (t.status !== 'done' || !t.completedAt) continue
     const day = format(parseISO(t.completedAt), DATE_FMT)
     if (day < week.start || day > week.end) continue
-    done.push({ item: { id: t.id, title: t.title, project: t.project, day }, at: t.completedAt })
+    const projects = projectsOf(t)
+    done.push({
+      item: { id: t.id, title: t.title, projects: projects.length > 0 ? projects : undefined, day },
+      at: t.completedAt,
+    })
   }
   done.sort((a, b) => a.at.localeCompare(b.at))
   const items = done.map((d) => d.item)
@@ -86,10 +92,13 @@ export function buildReview(tasks: Task[], events: CalEvent[], week: ReviewWeek)
 
   const buckets = new Map<string, ReviewItem[]>()
   for (const item of items) {
-    const key = item.project ?? ''
-    const bucket = buckets.get(key)
-    if (bucket) bucket.push(item)
-    else buckets.set(key, [item])
+    // '' is the untagged bucket; a multi-tagged item lands in each of its own.
+    const keys = item.projects && item.projects.length > 0 ? item.projects : ['']
+    for (const key of keys) {
+      const bucket = buckets.get(key)
+      if (bucket) bucket.push(item)
+      else buckets.set(key, [item])
+    }
   }
   const byProject: ReviewProjectGroup[] = [...buckets.entries()]
     .map(([key, list]) => ({ project: key === '' ? null : key, items: list }))
@@ -133,7 +142,8 @@ export function reviewToMarkdown(
     for (const group of data.byDay) {
       lines.push(`### ${group.label}`)
       for (const item of group.items) {
-        lines.push(`- ${item.title}${item.project ? `  \`#${item.project}\`` : ''}`)
+        const tags = (item.projects ?? []).map((p) => `\`#${p}\``).join(' ')
+        lines.push(`- ${item.title}${tags ? `  ${tags}` : ''}`)
       }
       lines.push('')
     }
