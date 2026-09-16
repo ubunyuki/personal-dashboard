@@ -35,6 +35,7 @@ function sampleAppData(): PersistedAppData {
     bookmarkGroups: [{ id: 'g1', name: 'Work', createdAt: A, updatedAt: A }],
     projectMeta: [{ name: 'reporting', color: 'rose', updatedAt: A }],
     dashboardLayout: [{ id: 'notes', visible: false }],
+    busStops: [],
     settings: defaultSettings(),
     lastChangeAt: A,
   }

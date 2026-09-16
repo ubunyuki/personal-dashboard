@@ -40,13 +40,13 @@ describe('dashboard layout editing', () => {
     const view = render(<DashboardPage />)
 
     await user.click(screen.getByRole('button', { name: 'Edit layout' }))
-    expect(screen.getAllByTitle('Move tile up')).toHaveLength(6)
+    expect(screen.getAllByTitle('Move tile up')).toHaveLength(7)
 
     // The saved tile keeps its place at the front; the rest are appended
     // behind it — so the first strip still belongs to notes.
     await user.click(screen.getAllByTitle('Hide tile')[0])
     expect(useAppStore.getState().dashboardLayout[0]).toEqual({ id: 'notes', visible: false })
-    expect(tileIds()).toHaveLength(6)
+    expect(tileIds()).toHaveLength(7)
     view.unmount()
   })
 })

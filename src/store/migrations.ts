@@ -27,6 +27,7 @@ export function defaultAppData(): PersistedAppData {
     bookmarkGroups: [],
     projectMeta: [],
     dashboardLayout: defaultLayout(),
+    busStops: [],
     settings: defaultSettings(),
     lastChangeAt: null,
   }

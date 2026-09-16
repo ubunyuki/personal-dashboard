@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type Tab = 'dashboard' | 'tasks' | 'notes' | 'bookmarks'
+export type Tab = 'dashboard' | 'tasks' | 'notes' | 'bookmarks' | 'bus'
 
 export type BackupMode = 'unconfigured' | 'auto' | 'permission-needed' | 'blocked' | 'error'
 

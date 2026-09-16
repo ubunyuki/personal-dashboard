@@ -10,6 +10,7 @@ import {
   type Note,
   type PersistedAppData,
   type Settings,
+  type SavedBusStop,
   type Task,
   type TileId,
   type WeatherSettings,
@@ -20,6 +21,7 @@ import { domainOf, normalizeUrl } from '../lib/bookmarks/url'
 import { splitNoteForTask } from '../lib/notes/splitNoteForTask'
 import { moveNoteIn } from '../features/notes/ordering'
 import { moveTileIn, reconcileLayout, toggleTileIn } from '../lib/dashboard/layout'
+import { busStopKey, moveBusStopIn } from '../lib/bus/saved'
 import {
   clearProjectIn,
   moveProjectIn,
@@ -30,6 +32,9 @@ import { defaultAppData, runMigrations } from './migrations'
 
 export type TaskInput = Pick<Task, 'title'> &
   Partial<Omit<Task, 'id' | 'title' | 'createdAt' | 'updatedAt'>>
+
+/** Everything the picker knows about a stop; the store supplies the rest. */
+export type BusStopInput = Omit<SavedBusStop, 'id' | 'createdAt' | 'updatedAt'>
 
 export type EventInput = Pick<CalEvent, 'title' | 'date'> & Partial<Pick<CalEvent, 'time'>>
 
@@ -77,6 +82,14 @@ export type AppStore = PersistedAppData & {
   /** The tag comes off every member (their other tags stay); the project
    *  disappears, because it was only ever its tag. */
   clearProject: (name: string) => void
+  /** Watch a stop. Returns the existing row when this exact route, direction
+   *  and stop is already saved, so adding twice cannot duplicate a tile. */
+  addBusStop: (input: BusStopInput) => SavedBusStop
+  removeBusStop: (id: string) => void
+  /** Swap with the neighbour in display order (delta -1 = up, +1 = down). */
+  moveBusStop: (id: string, delta: -1 | 1) => void
+  /** Empty or blank clears the override and returns to the operator's name. */
+  setBusStopLabel: (id: string, label: string) => void
   /** Swap a dashboard tile with its neighbour (delta -1 = up, +1 = down). */
   moveDashboardTile: (id: TileId, delta: -1 | 1) => void
   /** Hide or show a tile; hidden tiles keep their slot in the order. */
@@ -101,6 +114,7 @@ export const persistedSlice = (s: AppStore): PersistedAppData => ({
   bookmarkGroups: s.bookmarkGroups,
   projectMeta: s.projectMeta,
   dashboardLayout: s.dashboardLayout,
+  busStops: s.busStops,
   settings: s.settings,
   lastChangeAt: s.lastChangeAt,
 })
@@ -376,6 +390,41 @@ export const useAppStore = create<AppStore>()(
           ...clearProjectIn(s.tasks, s.projectMeta, name, nowIso()),
           lastChangeAt: nowIso(),
         })),
+
+      addBusStop: (input) => {
+        const key = busStopKey(input)
+        const existing = get().busStops.find((s) => busStopKey(s) === key)
+        if (existing) return existing
+        const at = nowIso()
+        const stop: SavedBusStop = { ...input, id: newId(), createdAt: at, updatedAt: at }
+        set((s) => ({ busStops: [...s.busStops, stop], lastChangeAt: at }))
+        return stop
+      },
+
+      removeBusStop: (id) =>
+        set((s) => ({
+          busStops: s.busStops.filter((b) => b.id !== id),
+          lastChangeAt: nowIso(),
+        })),
+
+      moveBusStop: (id, delta) =>
+        set((s) => {
+          const busStops = moveBusStopIn(s.busStops, id, delta)
+          if (busStops === s.busStops) return {}
+          return { busStops, lastChangeAt: nowIso() }
+        }),
+
+      setBusStopLabel: (id, label) =>
+        set((s) => {
+          const at = nowIso()
+          const trimmed = label.trim()
+          return {
+            busStops: s.busStops.map((b) =>
+              b.id === id ? { ...b, label: trimmed === '' ? undefined : trimmed, updatedAt: at } : b,
+            ),
+            lastChangeAt: at,
+          }
+        }),
 
       // Both reconcile FIRST, so the no-op check compares against what the
       // dashboard actually renders rather than against a stale stored array.

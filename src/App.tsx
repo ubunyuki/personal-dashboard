@@ -11,6 +11,7 @@ import { DashboardPage } from './features/dashboard/DashboardPage'
 import { TasksPage } from './features/tasks/TasksPage'
 import { NotesPage } from './features/notes/NotesPage'
 import { BookmarksPage } from './features/bookmarks/BookmarksPage'
+import { BusPage } from './features/bus/BusPage'
 import { TaskEditor } from './features/tasks/TaskEditor'
 import { SettingsModal } from './features/settings/SettingsModal'
 import { HelpModal } from './features/help/HelpModal'
@@ -47,6 +48,7 @@ export default function App() {
         {tab === 'tasks' && <TasksPage />}
         {tab === 'notes' && <NotesPage />}
         {tab === 'bookmarks' && <BookmarksPage />}
+        {tab === 'bus' && <BusPage />}
       </main>
       <footer className="flex shrink-0 items-center justify-between border-t border-slate-200 px-3 py-1 text-[11px] text-slate-400 dark:border-slate-800 dark:text-slate-600">
         <span>build {__BUILD_ID__}</span>

@@ -1,4 +1,4 @@
-import { Bookmark, LayoutDashboard, ListTodo, StickyNote } from 'lucide-react'
+import { Bookmark, Bus, LayoutDashboard, ListTodo, StickyNote } from 'lucide-react'
 import { useUiStore, type Tab } from '../../store/uiStore'
 import { BackupChip } from './BackupChip'
 import { Clock } from './Clock'
@@ -13,6 +13,7 @@ const tabs: Array<{ id: Tab; label: string; Icon: typeof LayoutDashboard }> = [
   { id: 'tasks', label: 'Tasks', Icon: ListTodo },
   { id: 'notes', label: 'Notes', Icon: StickyNote },
   { id: 'bookmarks', label: 'Bookmarks', Icon: Bookmark },
+  { id: 'bus', label: 'Bus', Icon: Bus },
 ]
 
 export function StatusBar() {

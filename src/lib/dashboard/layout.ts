@@ -22,6 +22,7 @@ export const TILE_ORDER: readonly TileId[] = [
   'events',
   'notes',
   'bookmarks',
+  'bus',
 ]
 
 export function defaultLayout(): DashboardTile[] {

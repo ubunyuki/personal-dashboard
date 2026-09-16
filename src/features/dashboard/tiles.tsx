@@ -3,6 +3,7 @@ import type { TileId } from '../../types'
 import { useNow } from '../../lib/useNow'
 import { useAppStore } from '../../store/appStore'
 import { metrics, taskBuckets } from '../../store/selectors'
+import { BusTile } from './BusTile'
 import { MetricTiles } from './MetricTiles'
 import { PinnedNotes } from './PinnedNotes'
 import { RecentBookmarks } from './RecentBookmarks'
@@ -57,4 +58,5 @@ export const TILE_REGISTRY: Record<TileId, TileDef> = {
   events: { label: 'Upcoming events', span: 'half', Component: UpcomingEvents },
   notes: { label: 'Recent notes', span: 'half', Component: RecentNotes },
   bookmarks: { label: 'Bookmarks', span: 'half', Component: RecentBookmarks },
+  bus: { label: 'Bus arrivals', span: 'half', Component: BusTile },
 }

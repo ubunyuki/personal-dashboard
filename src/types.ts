@@ -157,20 +157,58 @@ export interface Settings {
   weekStartsOn: 0 | 1
 }
 
-/** Exactly what zustand persist writes (partialize output). */
 /**
  * Dashboard tiles the user can reorder and hide. The union is this build's
  * vocabulary, NOT a guarantee about stored data — reconcileLayout
  * (lib/dashboard/layout.ts) drops ids it does not recognise and appends ones
  * the layout is missing, so layouts survive both directions of version skew.
  */
-export type TileId = 'metrics' | 'pinnedNotes' | 'buckets' | 'events' | 'notes' | 'bookmarks'
+export type TileId =
+  | 'metrics'
+  | 'pinnedNotes'
+  | 'buckets'
+  | 'events'
+  | 'notes'
+  | 'bookmarks'
+  | 'bus'
 
 export interface DashboardTile {
   id: TileId
   visible: boolean
 }
 
+/** The two operators WorkDesk reads. Minibus and NLB publish through
+ *  different, weaker APIs and are deliberately out of scope. */
+export type BusOperator = 'KMB' | 'CTB'
+
+/** Both operators call these 'O' and 'I' on the wire; the long spelling is
+ *  what CTB's own URLs use and what reads at a glance in stored data. */
+export type BusDirection = 'outbound' | 'inbound'
+
+/**
+ * A bus stop the user watches. Stop and destination names are COPIED in
+ * rather than looked up: the tile has to render the moment the dashboard
+ * opens, offline included, and only the arrival times need the network.
+ */
+export interface SavedBusStop {
+  id: string
+  operator: BusOperator
+  route: string
+  direction: BusDirection
+  /** KMB route variants; Citybus has no service types. */
+  serviceType?: string
+  /** The operator's stop id, which is what the ETA endpoint is keyed by. */
+  stopId: string
+  stopName: string
+  destination: string
+  /** User's own name for the stop, e.g. "Home → Office". */
+  label?: string
+  order?: number
+  createdAt: string
+  updatedAt: string
+}
+
+/** Exactly what zustand persist writes (partialize output). */
 export interface PersistedAppData {
   tasks: Task[]
   notes: Note[]
@@ -185,6 +223,11 @@ export interface PersistedAppData {
    *  see the ProjectMeta note above for why that is safe. Also kept out of
    *  requiredArraysFor so older backups stay restorable. */
   dashboardLayout: DashboardTile[]
+  /** Watched bus stops. Top-level and additive like dashboardLayout, and
+   *  likewise out of requiredArraysFor. The cached ROUTE and STOP lists the
+   *  picker uses are not here on purpose — they are operator data, not the
+   *  user's, and live in IndexedDB so backups stay small. */
+  busStops: SavedBusStop[]
   settings: Settings
   /** Bumped only by data mutations, never by backup bookkeeping. */
   lastChangeAt: string | null
