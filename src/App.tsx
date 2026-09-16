@@ -3,6 +3,8 @@ import { WhiteboardOverlay } from './features/whiteboard/WhiteboardOverlay'
 import { CommandPalette } from './features/palette/CommandPalette'
 import { ReviewDrawer } from './features/review/ReviewDrawer'
 import { CalendarPopover } from './features/statusbar/CalendarPopover'
+import { RemindersPanel } from './features/statusbar/RemindersPanel'
+import { WeatherMenu } from './features/statusbar/WeatherMenu'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { TasksPage } from './features/tasks/TasksPage'
 import { NotesPage } from './features/notes/NotesPage'
@@ -29,6 +31,8 @@ export default function App() {
   const restorePrompt = useUiStore((s) => s.restorePrompt)
   const paletteOpen = useUiStore((s) => s.paletteOpen)
   const reviewOpen = useUiStore((s) => s.reviewOpen)
+  const bellOpen = useUiStore((s) => s.bellOpen)
+  const weatherMenuOpen = useUiStore((s) => s.weatherMenuOpen)
   return (
     <div className="flex h-full min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <StatusBar />
@@ -50,6 +54,8 @@ export default function App() {
         </span>
       </footer>
       <CalendarPopover />
+      {bellOpen && <RemindersPanel />}
+      {weatherMenuOpen && <WeatherMenu />}
       <WhiteboardOverlay />
       {editingTask !== null && <TaskEditor key={editingTask} />}
       {settingsOpen && <SettingsModal />}

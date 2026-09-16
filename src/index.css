@@ -21,3 +21,12 @@ body {
 .dark body {
   background: #020617;
 }
+
+/* Horizontal scrolling with no visible scrollbar — the status bar has a fixed
+   height with no room for a scrollbar track. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

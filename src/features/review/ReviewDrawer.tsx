@@ -4,7 +4,7 @@ import { Drawer } from '../../components/ui/Drawer'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 import { formatDueLabel } from '../../lib/dates/dates'
-import { buildReview, reviewToMarkdown, weekRange } from './review'
+import { buildReview, plural, reviewToMarkdown, weekRange } from './review'
 
 const pillCls = (on: boolean) =>
   `flex items-center gap-1 rounded-md px-2 py-1 text-xs ${
@@ -114,7 +114,7 @@ export function ReviewDrawer() {
           className={pillCls(includeEvents)}
           onClick={() => setIncludeEvents(!includeEvents)}
         >
-          Meetings
+          Events
         </button>
         <button type="button" className={`${pillCls(false)} ml-auto`} onClick={copy}>
           {copied ? <Check size={13} /> : <Clipboard size={13} />}
@@ -155,7 +155,7 @@ export function ReviewDrawer() {
         {includeEvents && data.eventCount > 0 && (
           <section className="mb-4">
             <h3 className="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-              Meetings
+              Events
             </h3>
             <ul className="flex flex-col gap-1">
               {data.events.map((e) => (
@@ -185,7 +185,7 @@ export function ReviewDrawer() {
 
       <footer className="border-t border-slate-200 px-4 py-2 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
         {data.taskCount} completed
-        {includeEvents ? ` · ${data.eventCount} meetings` : ''}
+        {includeEvents ? ` · ${plural(data.eventCount, 'event', 'events')}` : ''}
       </footer>
     </Drawer>
   )

@@ -4,7 +4,7 @@ import { useNow } from '../../lib/useNow'
 import { useUiStore } from '../../store/uiStore'
 
 /** Status-bar clock; clicking it (or its calendar icon) opens the calendar.
- *  The date part hides on narrow windows so the bar never wraps or scrolls. */
+ *  The date part hides on narrow windows so the bar stays short before it scrolls. */
 export function Clock() {
   const now = useNow(1_000)
   const toggleCalendar = useUiStore((s) => s.toggleCalendar)

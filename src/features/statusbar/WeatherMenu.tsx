@@ -70,7 +70,7 @@ export function WeatherMenu() {
   return (
     <>
       <div className="fixed inset-0 z-30" onClick={closeWeatherMenu} />
-      <div className="absolute top-9 right-0 z-40 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+      <div className="fixed top-12 right-2 z-40 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
         {hko ? (
           <div className="flex max-h-72 flex-col gap-0.5 overflow-y-auto">
             {stationsError ? (

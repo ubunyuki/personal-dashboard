@@ -20,7 +20,6 @@ import { getWeather, isWeatherStale } from '../../lib/weather/weather'
 import type { WeatherNow } from '../../lib/weather/providers'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
-import { WeatherMenu } from './WeatherMenu'
 
 const HKO_HOME = 'https://www.hko.gov.hk/en/index.html'
 
@@ -42,7 +41,6 @@ const icons: Record<ConditionIcon, typeof Cloud> = {
  *  location dropdown; the readings link to the HKO site for full detail. */
 export function WeatherChip() {
   const weather = useAppStore((s) => s.settings.weather)
-  const menuOpen = useUiStore((s) => s.weatherMenuOpen)
   const toggleWeatherMenu = useUiStore((s) => s.toggleWeatherMenu)
   const [state, setState] = useState<WeatherNow | 'error' | null>(null)
 
@@ -101,7 +99,7 @@ export function WeatherChip() {
       : 'Loading weather…'
 
   return (
-    <div className="relative flex items-center text-sm text-slate-600 dark:text-slate-300">
+    <div className="flex items-center text-sm text-slate-600 dark:text-slate-300">
       {label && (
         <button
           type="button"
@@ -133,7 +131,6 @@ export function WeatherChip() {
           </span>
         )}
       </a>
-      {menuOpen && <WeatherMenu />}
     </div>
   )
 }

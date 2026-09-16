@@ -117,7 +117,7 @@ export interface MarkdownOptions {
   includeEvents: boolean
 }
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
+export const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
 
 /** Standup-ready markdown: one heading per day (or project), then a tally. */
 export function reviewToMarkdown(
@@ -148,7 +148,7 @@ export function reviewToMarkdown(
   }
 
   if (includeEvents && data.eventCount > 0) {
-    lines.push('### Meetings')
+    lines.push('### Events')
     for (const e of data.events) {
       lines.push(
         `- ${format(parseLocalDate(e.date), 'EEE d MMM')}${e.time ? ` ${e.time}` : ''} — ${e.title}`,
@@ -158,7 +158,7 @@ export function reviewToMarkdown(
   }
 
   const tally = [plural(data.taskCount, 'task', 'tasks') + ' completed']
-  if (includeEvents) tally.push(plural(data.eventCount, 'meeting', 'meetings'))
+  if (includeEvents) tally.push(plural(data.eventCount, 'event', 'events'))
   lines.push(`_${tally.join(' · ')}_`)
   return lines.join('\n')
 }

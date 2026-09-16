@@ -176,7 +176,7 @@ export function HelpModal() {
           <ul className="flex flex-col gap-1">
             <Li>Open it from the “Done this week” tile, or run it from the palette</Li>
             <Li>Arrows step back through past weeks; group by day or by project</Li>
-            <Li>Copy as markdown for a standup or 1:1 — meetings optional</Li>
+            <Li>Copy as markdown for a standup or 1:1 — events optional</Li>
           </ul>
         </HelpCard>
 

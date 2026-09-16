@@ -170,8 +170,8 @@ describe('reviewToMarkdown', () => {
     })
     expect(md).toContain('### #reporting\n- Ship the quarterly report — Mon 14 Sep')
     expect(md).toContain('### No project\n- Loose end — Tue 15 Sep')
-    expect(md).toContain('### Meetings\n- Tue 15 Sep 09:30 — Team standup')
-    expect(md.endsWith('_2 tasks completed · 1 meeting_')).toBe(true)
+    expect(md).toContain('### Events\n- Tue 15 Sep 09:30 — Team standup')
+    expect(md.endsWith('_2 tasks completed · 1 event_')).toBe(true)
   })
 
   it('says so plainly when the week was empty', () => {
@@ -181,6 +181,6 @@ describe('reviewToMarkdown', () => {
       includeEvents: true,
     })
     expect(md).toContain('_Nothing completed this week._')
-    expect(md).toContain('_0 tasks completed · 0 meetings_')
+    expect(md).toContain('_0 tasks completed · 0 events_')
   })
 })

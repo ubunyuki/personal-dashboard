@@ -19,7 +19,7 @@ to a OneDrive folder.
   due date+time, project tag), status cycling on rows; group the board by
   project, each with its own colour, renameable and reorderable.
 - **Weekly review** — the “Done this week” tile opens a drawer of what you
-  finished, grouped by day or by project, with meetings and a one-click
+  finished, grouped by day or by project, with events and a one-click
   copy as standup-ready markdown.
 - **Notes** — instant capture (`Ctrl+Enter`; drag-bar resizable box with
   remembered height, drafts survive tab switches), inline edit,

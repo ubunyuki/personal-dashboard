@@ -18,15 +18,15 @@ export function StatusBar() {
   const active = useUiStore((s) => s.activeTab)
   const setActiveTab = useUiStore((s) => s.setActiveTab)
   return (
-    <header className="flex h-11 shrink-0 items-center gap-1 border-b border-slate-200 bg-white/85 px-2 backdrop-blur dark:border-slate-800 dark:bg-slate-900/85">
-      <span className="pr-2 pl-1 text-sm font-semibold tracking-tight select-none">WorkDesk</span>
-      <nav className="flex items-center gap-1">
+    <header className="no-scrollbar flex h-11 shrink-0 items-center gap-1 overflow-x-auto border-b border-slate-200 bg-white/85 px-2 backdrop-blur dark:border-slate-800 dark:bg-slate-900/85">
+      <span className="shrink-0 pr-2 pl-1 text-sm font-semibold tracking-tight select-none">WorkDesk</span>
+      <nav className="flex shrink-0 items-center gap-1">
         {tabs.map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm ${
+            className={`flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1 text-sm whitespace-nowrap ${
               active === id
                 ? 'bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
                 : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
@@ -37,7 +37,7 @@ export function StatusBar() {
           </button>
         ))}
       </nav>
-      <div className="ml-auto flex items-center gap-2 pr-1">
+      <div className="ml-auto flex shrink-0 items-center gap-2 pr-1">
         <BackupChip />
         <RemindersBell />
         <QuickActions />
