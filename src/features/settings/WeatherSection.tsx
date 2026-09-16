@@ -3,7 +3,15 @@ import { Field, inputCls } from '../../components/ui/Field'
 import { Button } from '../../components/ui/Button'
 import type { WeatherLocation, WeatherSource } from '../../types'
 import { geocodeCity, listHkoStations } from '../../lib/weather/providers'
+import { playChime, primeChime } from '../../lib/weather/chime'
+import { warningSettings } from '../../lib/weather/warnings'
 import { useAppStore } from '../../store/appStore'
+
+type Permission = NotificationPermission | 'unsupported'
+
+function notificationPermission(): Permission {
+  return typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
+}
 
 export function WeatherSection() {
   const weather = useAppStore((s) => s.settings.weather)
@@ -13,6 +21,13 @@ export function WeatherSection() {
   const [results, setResults] = useState<WeatherLocation[] | null>(null)
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState('')
+  const warn = warningSettings(weather)
+  const [permission, setPermission] = useState<Permission>(notificationPermission)
+
+  const patchWarnings = (patch: Partial<typeof warn>) =>
+    // updateSettings deep-merges only one level, so `warnings` is replaced
+    // wholesale — spread the resolved values or the siblings are lost.
+    updateSettings({ weather: { warnings: { ...warn, ...patch } } })
 
   useEffect(() => {
     if (weather.enabled && weather.source === 'hko') {
@@ -156,6 +171,68 @@ export function WeatherSection() {
           )}
         </>
       )}
+
+      <div className="border-t border-slate-200 pt-3 dark:border-slate-800">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={warn.enabled}
+            onChange={(e) => patchWarnings({ enabled: e.target.checked })}
+            className="h-4 w-4 accent-indigo-600"
+          />
+          <span>Alert me when a Hong Kong Observatory warning changes</span>
+        </label>
+        {warn.enabled && (
+          <div className="mt-2 flex flex-col gap-2 pl-6">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={warn.sound}
+                onChange={(e) => {
+                  // Inside the click, so the AudioContext starts unlocked — a
+                  // chime fired later by the poll timer cannot unlock itself.
+                  if (e.target.checked) {
+                    primeChime()
+                    playChime()
+                  }
+                  patchWarnings({ sound: e.target.checked })
+                }}
+                className="h-4 w-4 accent-indigo-600"
+              />
+              <span>Play a sound</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={warn.notify}
+                onChange={(e) => {
+                  patchWarnings({ notify: e.target.checked })
+                  // Browsers only accept this from a user gesture.
+                  if (e.target.checked && notificationPermission() === 'default') {
+                    void Notification.requestPermission().then(setPermission)
+                  }
+                }}
+                className="h-4 w-4 accent-indigo-600"
+              />
+              <span>Also raise a desktop notification</span>
+            </label>
+            {warn.notify && permission !== 'granted' && (
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {permission === 'denied'
+                  ? 'Notifications are blocked for this site — allow them in the browser’s site settings.'
+                  : permission === 'unsupported'
+                    ? 'This browser has no notification support; the in-app alert still appears.'
+                    : 'Permission not granted yet — the in-app alert still appears.'}
+              </p>
+            )}
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Checked every minute while WorkDesk is open, including in a background tab. Alerts
+              fire only when the hoisted set actually changes — never on a repeat check, and never
+              for a signal that was already up when you opened the app.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

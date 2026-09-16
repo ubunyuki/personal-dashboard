@@ -25,7 +25,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // gif is here for the bundled HKO warning icons (public/hko) —
+        // without it the warning chip loses its icons offline.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,gif,woff2}'],
         // Default 2 MiB would silently skip the Excalidraw chunk (M7).
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },

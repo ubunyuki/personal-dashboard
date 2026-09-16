@@ -9,6 +9,7 @@ export function defaultSettings(): Settings {
       hkoStation: 'Hong Kong Observatory',
       unit: 'celsius',
       labelStyle: 'name',
+      warnings: { enabled: true, notify: true, sound: true },
     },
     weekStartsOn: 0,
   }

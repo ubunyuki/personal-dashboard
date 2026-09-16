@@ -116,6 +116,21 @@ export interface WeatherLocation {
 
 export type WeatherSource = 'hko' | 'open-meteo'
 
+/**
+ * HKO weather-warning alerts. Nested under `weather` deliberately: the
+ * one-level deep-merge in updateSettings already covers that key, so no merge
+ * change is needed. Nested also means no backfill on same-version rehydration
+ * — read these through `warningSettings()`, never field by field.
+ */
+export interface WarningSettings {
+  /** Poll HKO and show the status-bar chip. */
+  enabled?: boolean
+  /** Also raise an OS Notification, when the user has granted permission. */
+  notify?: boolean
+  /** Play a chime with the in-app alert. */
+  sound?: boolean
+}
+
 export interface WeatherSettings {
   enabled: boolean
   /** 'hko' = Hong Kong Observatory official readings; 'open-meteo' = any city. */
@@ -125,6 +140,7 @@ export interface WeatherSettings {
   unit: 'celsius' | 'fahrenheit'
   /** Chip label style: full place name (default) or a short code like "ST". */
   labelStyle?: 'name' | 'code'
+  warnings?: WarningSettings
 }
 
 export interface Settings {

@@ -1,5 +1,12 @@
 import type { WeatherLocation } from '../../types'
+import { nowIso } from '../id'
 import { hkoIconToCondition, wmoToCondition, type ConditionIcon } from './conditions'
+import {
+  parseSwt,
+  parseWarningInfo,
+  parseWarnsum,
+  type WarningSnapshot,
+} from './warnings'
 
 export interface WeatherNow {
   tempC: number
@@ -10,8 +17,8 @@ export interface WeatherNow {
   observedAt?: string
 }
 
-const HKO_URL =
-  'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=en'
+const HKO_BASE = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php'
+const hkoUrl = (dataType: string) => `${HKO_BASE}?dataType=${dataType}&lang=en`
 
 interface HkoRhrread {
   temperature?: { data?: Array<{ place: string; value: number; unit: string }>; recordTime?: string }
@@ -19,10 +26,30 @@ interface HkoRhrread {
   icon?: number[]
 }
 
+async function fetchHkoJson(dataType: string): Promise<unknown> {
+  const res = await fetch(hkoUrl(dataType))
+  if (!res.ok) throw new Error(`HKO ${dataType} ${res.status}`)
+  return await res.json()
+}
+
 async function fetchRhrread(): Promise<HkoRhrread> {
-  const res = await fetch(HKO_URL)
-  if (!res.ok) throw new Error(`HKO ${res.status}`)
-  return (await res.json()) as HkoRhrread
+  return (await fetchHkoJson('rhrread')) as HkoRhrread
+}
+
+/**
+ * Hoisted warnings plus HKO's pre-announcements, in one pass. Both bodies are
+ * tiny when quiet (`{}` and `{"swt":[]}`), which is what makes the 60s poll
+ * in useWarningPoll affordable. Fetched together so the chip never shows a
+ * tip and a signal from different minutes.
+ */
+export async function fetchWarnings(): Promise<WarningSnapshot> {
+  const [warnsum, swt] = await Promise.all([fetchHkoJson('warnsum'), fetchHkoJson('swt')])
+  return { warnings: parseWarnsum(warnsum), tips: parseSwt(swt), fetchedAt: nowIso() }
+}
+
+/** Detail paragraphs for the warning panel — only fetched when it is opened. */
+export async function fetchWarningDetails(): Promise<Record<string, string[]>> {
+  return parseWarningInfo(await fetchHkoJson('warningInfo'))
 }
 
 export async function fetchHko(station: string): Promise<WeatherNow> {

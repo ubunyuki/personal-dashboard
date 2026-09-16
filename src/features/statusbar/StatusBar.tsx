@@ -5,6 +5,7 @@ import { Clock } from './Clock'
 import { QuickActions } from './QuickActions'
 import { RemindersBell } from './RemindersBell'
 import { ThemeToggle } from './ThemeToggle'
+import { WarningChip } from './WarningChip'
 import { WeatherChip } from './WeatherChip'
 
 const tabs: Array<{ id: Tab; label: string; Icon: typeof LayoutDashboard }> = [
@@ -43,6 +44,7 @@ export function StatusBar() {
         <QuickActions />
         <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
         <ThemeToggle />
+        <WarningChip />
         <WeatherChip />
         <Clock />
       </div>

@@ -5,6 +5,8 @@ import { ReviewDrawer } from './features/review/ReviewDrawer'
 import { CalendarPopover } from './features/statusbar/CalendarPopover'
 import { RemindersPanel } from './features/statusbar/RemindersPanel'
 import { WeatherMenu } from './features/statusbar/WeatherMenu'
+import { WarningPanel } from './features/statusbar/WarningPanel'
+import { WarningToast } from './features/statusbar/WarningToast'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { TasksPage } from './features/tasks/TasksPage'
 import { NotesPage } from './features/notes/NotesPage'
@@ -18,11 +20,13 @@ import { useUiStore } from './store/uiStore'
 import { useThemeEffect } from './lib/theme'
 import { usePwaUpdatePoll } from './lib/usePwaUpdatePoll'
 import { useShortcuts } from './lib/useShortcuts'
+import { useWarningPoll } from './features/statusbar/useWarningPoll'
 
 export default function App() {
   useThemeEffect()
   usePwaUpdatePoll()
   useShortcuts()
+  useWarningPoll()
   const tab = useUiStore((s) => s.activeTab)
   const persisted = useUiStore((s) => s.storagePersisted)
   const editingTask = useUiStore((s) => s.editingTask)
@@ -33,6 +37,7 @@ export default function App() {
   const reviewOpen = useUiStore((s) => s.reviewOpen)
   const bellOpen = useUiStore((s) => s.bellOpen)
   const weatherMenuOpen = useUiStore((s) => s.weatherMenuOpen)
+  const warningPanelOpen = useUiStore((s) => s.warningPanelOpen)
   return (
     <div className="flex h-full min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <StatusBar />
@@ -56,6 +61,8 @@ export default function App() {
       <CalendarPopover />
       {bellOpen && <RemindersPanel />}
       {weatherMenuOpen && <WeatherMenu />}
+      {warningPanelOpen && <WarningPanel />}
+      <WarningToast />
       <WhiteboardOverlay />
       {editingTask !== null && <TaskEditor key={editingTask} />}
       {settingsOpen && <SettingsModal />}

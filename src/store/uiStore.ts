@@ -28,6 +28,7 @@ type UiState = {
   bellOpen: boolean
   calendar: { open: boolean; date: string | null }
   weatherMenuOpen: boolean
+  warningPanelOpen: boolean
   whiteboardOpen: boolean
   paletteOpen: boolean
   reviewOpen: boolean
@@ -57,6 +58,8 @@ type UiStore = UiState & {
   closeCalendar: () => void
   toggleWeatherMenu: () => void
   closeWeatherMenu: () => void
+  toggleWarningPanel: () => void
+  closeWarningPanel: () => void
   openWhiteboard: () => void
   closeWhiteboard: () => void
   togglePalette: () => void
@@ -83,6 +86,7 @@ export const initialUiState = (): UiState => ({
   bellOpen: false,
   calendar: { open: false, date: null },
   weatherMenuOpen: false,
+  warningPanelOpen: false,
   whiteboardOpen: false,
   paletteOpen: false,
   reviewOpen: false,
@@ -106,12 +110,13 @@ export const useUiStore = create<UiStore>()((set) => ({
   setBackupStatus: (status) => set({ backup: status }),
   openRestorePrompt: (kind) => set({ restorePrompt: kind, settingsOpen: false }),
   closeRestorePrompt: () => set({ restorePrompt: null }),
-  // The status-bar popovers (bell, calendar, weather menu) are mutually
-  // exclusive — opening one closes the others.
+  // The status-bar popovers (bell, calendar, weather menu, warning panel)
+  // are mutually exclusive — opening one closes the others.
   toggleBell: () =>
     set((s) => ({
       bellOpen: !s.bellOpen,
       weatherMenuOpen: false,
+      warningPanelOpen: false,
       calendar: { ...s.calendar, open: false },
     })),
   closeBell: () => set({ bellOpen: false }),
@@ -119,23 +124,43 @@ export const useUiStore = create<UiStore>()((set) => ({
     set((s) =>
       s.calendar.open
         ? { calendar: { ...s.calendar, open: false } }
-        : { calendar: { open: true, date: null }, bellOpen: false, weatherMenuOpen: false },
+        : {
+            calendar: { open: true, date: null },
+            bellOpen: false,
+            weatherMenuOpen: false,
+            warningPanelOpen: false,
+          },
     ),
   openCalendar: (date) =>
-    set({ calendar: { open: true, date: date ?? null }, bellOpen: false, weatherMenuOpen: false }),
+    set({
+      calendar: { open: true, date: date ?? null },
+      bellOpen: false,
+      weatherMenuOpen: false,
+      warningPanelOpen: false,
+    }),
   closeCalendar: () => set((s) => ({ calendar: { ...s.calendar, open: false } })),
   toggleWeatherMenu: () =>
     set((s) => ({
       weatherMenuOpen: !s.weatherMenuOpen,
       bellOpen: false,
+      warningPanelOpen: false,
       calendar: { ...s.calendar, open: false },
     })),
   closeWeatherMenu: () => set({ weatherMenuOpen: false }),
+  toggleWarningPanel: () =>
+    set((s) => ({
+      warningPanelOpen: !s.warningPanelOpen,
+      bellOpen: false,
+      weatherMenuOpen: false,
+      calendar: { ...s.calendar, open: false },
+    })),
+  closeWarningPanel: () => set({ warningPanelOpen: false }),
   openWhiteboard: () =>
     set((s) => ({
       whiteboardOpen: true,
       bellOpen: false,
       weatherMenuOpen: false,
+      warningPanelOpen: false,
       calendar: { ...s.calendar, open: false },
     })),
   closeWhiteboard: () => set({ whiteboardOpen: false }),
@@ -146,6 +171,7 @@ export const useUiStore = create<UiStore>()((set) => ({
       paletteOpen: !s.paletteOpen,
       bellOpen: false,
       weatherMenuOpen: false,
+      warningPanelOpen: false,
       calendar: { ...s.calendar, open: false },
     })),
   closePalette: () => set({ paletteOpen: false }),
@@ -155,6 +181,7 @@ export const useUiStore = create<UiStore>()((set) => ({
       paletteOpen: false,
       bellOpen: false,
       weatherMenuOpen: false,
+      warningPanelOpen: false,
       calendar: { ...s.calendar, open: false },
     })),
   closeReview: () => set({ reviewOpen: false }),
