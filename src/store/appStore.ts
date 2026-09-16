@@ -11,6 +11,7 @@ import {
   type PersistedAppData,
   type Settings,
   type Task,
+  type TileId,
   type WeatherSettings,
 } from '../types'
 import { newId, nowIso } from '../lib/id'
@@ -18,6 +19,7 @@ import { normalizeProjectTags } from '../lib/tasks/projectTags'
 import { domainOf, normalizeUrl } from '../lib/bookmarks/url'
 import { splitNoteForTask } from '../lib/notes/splitNoteForTask'
 import { moveNoteIn } from '../features/notes/ordering'
+import { moveTileIn, reconcileLayout, toggleTileIn } from '../lib/dashboard/layout'
 import {
   clearProjectIn,
   moveProjectIn,
@@ -75,6 +77,10 @@ export type AppStore = PersistedAppData & {
   /** The tag comes off every member (their other tags stay); the project
    *  disappears, because it was only ever its tag. */
   clearProject: (name: string) => void
+  /** Swap a dashboard tile with its neighbour (delta -1 = up, +1 = down). */
+  moveDashboardTile: (id: TileId, delta: -1 | 1) => void
+  /** Hide or show a tile; hidden tiles keep their slot in the order. */
+  toggleDashboardTile: (id: TileId) => void
   /** Restore path: replaces all persisted data via merge-set (replace-mode would strip actions). */
   replaceAll: (data: PersistedAppData) => void
   updateSettings: (patch: SettingsPatch) => void
@@ -94,6 +100,7 @@ export const persistedSlice = (s: AppStore): PersistedAppData => ({
   bookmarks: s.bookmarks,
   bookmarkGroups: s.bookmarkGroups,
   projectMeta: s.projectMeta,
+  dashboardLayout: s.dashboardLayout,
   settings: s.settings,
   lastChangeAt: s.lastChangeAt,
 })
@@ -369,6 +376,24 @@ export const useAppStore = create<AppStore>()(
           ...clearProjectIn(s.tasks, s.projectMeta, name, nowIso()),
           lastChangeAt: nowIso(),
         })),
+
+      // Both reconcile FIRST, so the no-op check compares against what the
+      // dashboard actually renders rather than against a stale stored array.
+      moveDashboardTile: (id, delta) =>
+        set((s) => {
+          const current = reconcileLayout(s.dashboardLayout)
+          const next = moveTileIn(current, id, delta)
+          if (next === current) return {}
+          return { dashboardLayout: next, lastChangeAt: nowIso() }
+        }),
+
+      toggleDashboardTile: (id) =>
+        set((s) => {
+          const current = reconcileLayout(s.dashboardLayout)
+          const next = toggleTileIn(current, id)
+          if (next === current) return {}
+          return { dashboardLayout: next, lastChangeAt: nowIso() }
+        }),
 
       replaceAll: (data) => set({ ...data }),
 

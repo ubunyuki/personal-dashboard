@@ -30,3 +30,14 @@ body {
     display: none;
   }
 }
+
+/* A dashboard tile's grid cell. `grid` so the card inside stretches to the
+   row height the way it did when the cards were grid children themselves,
+   and gone entirely when its tile renders nothing at all — PinnedNotes with
+   nothing pinned would otherwise leave a blank cell behind. */
+@utility tile-slot {
+  display: grid;
+  &:empty {
+    display: none;
+  }
+}

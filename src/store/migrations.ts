@@ -1,4 +1,5 @@
 import { SCHEMA_VERSION, type PersistedAppData, type Settings, type Task } from '../types'
+import { defaultLayout } from '../lib/dashboard/layout'
 import { normalizeProjectTags } from '../lib/tasks/projectTags'
 
 export function defaultSettings(): Settings {
@@ -25,6 +26,7 @@ export function defaultAppData(): PersistedAppData {
     bookmarks: [],
     bookmarkGroups: [],
     projectMeta: [],
+    dashboardLayout: defaultLayout(),
     settings: defaultSettings(),
     lastChangeAt: null,
   }

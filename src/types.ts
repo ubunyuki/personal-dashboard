@@ -158,6 +158,19 @@ export interface Settings {
 }
 
 /** Exactly what zustand persist writes (partialize output). */
+/**
+ * Dashboard tiles the user can reorder and hide. The union is this build's
+ * vocabulary, NOT a guarantee about stored data — reconcileLayout
+ * (lib/dashboard/layout.ts) drops ids it does not recognise and appends ones
+ * the layout is missing, so layouts survive both directions of version skew.
+ */
+export type TileId = 'metrics' | 'pinnedNotes' | 'buckets' | 'events' | 'notes' | 'bookmarks'
+
+export interface DashboardTile {
+  id: TileId
+  visible: boolean
+}
+
 export interface PersistedAppData {
   tasks: Task[]
   notes: Note[]
@@ -168,6 +181,10 @@ export interface PersistedAppData {
   /** Colour/order side-car for project tags — see ProjectMeta. NOT in
    *  requiredArraysFor: pre-M20 v3 backups lack it and must stay valid. */
   projectMeta: ProjectMeta[]
+  /** Tile order and visibility. Top-level and additive, so no schema bump —
+   *  see the ProjectMeta note above for why that is safe. Also kept out of
+   *  requiredArraysFor so older backups stay restorable. */
+  dashboardLayout: DashboardTile[]
   settings: Settings
   /** Bumped only by data mutations, never by backup bookkeeping. */
   lastChangeAt: string | null
