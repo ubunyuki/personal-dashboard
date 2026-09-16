@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import type { TaskPriority } from '../../types'
 import { inputCls } from '../../components/ui/Field'
-import { buildMonthGrid, parseLocalDate, toLocalDate } from '../../lib/dates/dates'
+import { buildMonthGrid, hkHolidayName, parseLocalDate, toLocalDate } from '../../lib/dates/dates'
 import { useNow } from '../../lib/useNow'
 import { useAppStore } from '../../store/appStore'
 import { compareDue } from '../../store/selectors'
@@ -74,6 +74,7 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
     return m
   }, [tasks, events])
 
+  const selectedHoliday = hkHolidayName(selected)
   const dayTasks = useMemo(
     () => tasks.filter((t) => t.dueDate === selected && t.status !== 'done').sort(compareDue),
     [tasks, selected],
@@ -132,20 +133,28 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
           {grid.map((cell) => {
             const sel = cell.date === selected
             const mk = markers.get(cell.date)
+            const holiday = hkHolidayName(cell.date)
+            // Sundays and gazetted holidays both read as non-working days.
+            const off = cell.weekday === 0 || holiday !== undefined
             return (
               <button
                 key={cell.date}
                 type="button"
                 aria-label={cell.date}
+                title={holiday}
                 onClick={() => setSelected(cell.date)}
                 className={`flex h-9 flex-col items-center justify-center rounded-md text-xs tabular-nums ${
                   sel
                     ? 'bg-indigo-600 font-semibold text-white'
                     : cell.date === todayStr
                       ? 'font-bold text-indigo-600 ring-1 ring-indigo-300 hover:bg-slate-100 dark:text-indigo-400 dark:ring-indigo-700 dark:hover:bg-slate-800'
-                      : cell.inMonth
-                        ? 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
-                        : 'text-slate-300 hover:bg-slate-50 dark:text-slate-600 dark:hover:bg-slate-800/50'
+                      : off
+                        ? cell.inMonth
+                          ? 'text-red-600 hover:bg-slate-100 dark:text-red-400 dark:hover:bg-slate-800'
+                          : 'text-red-300 hover:bg-slate-50 dark:text-red-900 dark:hover:bg-slate-800/50'
+                        : cell.inMonth
+                          ? 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                          : 'text-slate-300 hover:bg-slate-50 dark:text-slate-600 dark:hover:bg-slate-800/50'
                 }`}
               >
                 <span>{cell.day}</span>
@@ -164,6 +173,9 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
         <div className="mt-2 border-t border-slate-200 pt-2 dark:border-slate-800">
           <p className="mb-1 px-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
             {format(parseLocalDate(selected), 'EEEE d MMMM')}
+            {selectedHoliday && (
+              <span className="text-red-600 dark:text-red-400"> · {selectedHoliday}</span>
+            )}
           </p>
           {dayTasks.length === 0 && dayEvents.length === 0 && (
             <p className="px-1 py-1 text-sm text-slate-400 dark:text-slate-500">Nothing on this day.</p>

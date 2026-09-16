@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { buildMonthGrid, dueBucketOf } from './dates'
+import { buildMonthGrid, dueBucketOf, hkHolidayName } from './dates'
+import { HK_HOLIDAYS, HK_HOLIDAY_YEARS } from './hkHolidays'
 
 const NOW = new Date(2026, 8, 14, 12, 0, 0) // Mon 14 Sep 2026, 12:00 local
 
@@ -44,8 +45,55 @@ describe('buildMonthGrid', () => {
     expect(grid[41].date).toBe('2027-02-07')
   })
 
+  it('carries the real weekday, independent of the column', () => {
+    const mon = buildMonthGrid(2026, 8, 1)
+    const sun = buildMonthGrid(2026, 8, 0)
+    // Same calendar day, different column, same weekday.
+    const pick = (g: typeof mon) => g.find((c) => c.date === '2026-09-20')
+    expect(pick(mon)?.weekday).toBe(0)
+    expect(pick(sun)?.weekday).toBe(0)
+    expect(mon.indexOf(pick(mon)!) % 7).toBe(6)
+    expect(sun.indexOf(pick(sun)!) % 7).toBe(0)
+  })
+
   it('marks out-of-month cells', () => {
     const grid = buildMonthGrid(2026, 8, 1)
     expect(grid.filter((c) => c.inMonth)).toHaveLength(30)
+  })
+})
+
+describe('hkHolidayName', () => {
+  it('names a gazetted holiday and returns undefined for a working day', () => {
+    expect(hkHolidayName('2026-07-01')).toBe(
+      'Hong Kong Special Administrative Region Establishment Day',
+    )
+    expect(hkHolidayName('2026-09-16')).toBeUndefined()
+  })
+
+  it('covers the Easter/Ching Ming block that runs 3–7 April 2026', () => {
+    // Four gazetted days with a working Sunday (5 Apr) in the middle — the
+    // case where treating the block as one range would be wrong.
+    expect(hkHolidayName('2026-04-03')).toBe('Good Friday')
+    expect(hkHolidayName('2026-04-04')).toBe('The day following Good Friday')
+    expect(hkHolidayName('2026-04-05')).toBeUndefined()
+    expect(hkHolidayName('2026-04-06')).toBe('The day following Ching Ming Festival')
+    expect(hkHolidayName('2026-04-07')).toBe('The day following Easter Monday')
+  })
+
+  it('crosses the year boundary', () => {
+    expect(hkHolidayName('2026-12-25')).toBe('Christmas Day')
+    expect(hkHolidayName('2027-01-01')).toBe('The first day of January')
+  })
+
+  it('is empty rather than wrong outside the bundled years', () => {
+    expect(hkHolidayName(`${HK_HOLIDAY_YEARS.last + 1}-01-01`)).toBeUndefined()
+    expect(hkHolidayName('not-a-date')).toBeUndefined()
+  })
+
+  it('bundles every key as a sortable local date string', () => {
+    const keys = Object.keys(HK_HOLIDAYS)
+    expect(keys.length).toBeGreaterThan(30)
+    for (const k of keys) expect(k).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect([...keys].sort()).toEqual(keys)
   })
 })

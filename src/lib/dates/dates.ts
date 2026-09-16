@@ -1,4 +1,5 @@
 import { addDays, format, parseISO } from 'date-fns'
+import { HK_HOLIDAYS } from './hkHolidays'
 
 export const DATE_FMT = 'yyyy-MM-dd'
 
@@ -49,6 +50,16 @@ export interface MonthCell {
   date: string
   day: number
   inMonth: boolean
+  /** 0 = Sunday … 6 = Saturday. Carried on the cell so callers style by real
+   *  day-of-week rather than by column, which moves with weekStartsOn. */
+  weekday: number
+}
+
+/** Official English name of the HK public holiday on a local 'yyyy-MM-dd'.
+ *  Undefined outside the bundled years means "not known", not "not a holiday"
+ *  — see HK_HOLIDAY_YEARS. */
+export function hkHolidayName(date: string): string | undefined {
+  return HK_HOLIDAYS[date]
 }
 
 /** 6×7 month grid — always 42 cells so the popover never jumps height.
@@ -64,6 +75,11 @@ export function buildMonthGrid(
   const start = addDays(first, -lead)
   return Array.from({ length: 42 }, (_, i) => {
     const d = addDays(start, i)
-    return { date: toLocalDate(d), day: d.getDate(), inMonth: d.getMonth() === monthIndex0 }
+    return {
+      date: toLocalDate(d),
+      day: d.getDate(),
+      inMonth: d.getMonth() === monthIndex0,
+      weekday: d.getDay(),
+    }
   })
 }
