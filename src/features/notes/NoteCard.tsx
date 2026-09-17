@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { ArrowRight, ChevronDown, ChevronUp, Pencil, Pin, PinOff, SquareCheck, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { parseISO } from 'date-fns'
@@ -7,6 +7,7 @@ import { inputCls } from '../../components/ui/Field'
 import { tintedIconBtnCls as iconBtn } from '../../components/ui/swatches'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
+import { useClamp } from '../../lib/useClamp'
 
 const actionCls =
   'flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
@@ -31,6 +32,21 @@ export function NoteCard({
   const openTaskEditor = useUiStore((s) => s.openTaskEditor)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(note.text)
+  const { ref: textRef, expanded, overflows, toggle } = useClamp<HTMLParagraphElement>(note.text)
+  const taRef = useRef<HTMLTextAreaElement>(null)
+
+  // Grow the box to the text instead of guessing from hard newlines — a long
+  // wrapped paragraph has none. CSS caps it: min-h-20 floors the jsdom/empty
+  // case, max-h-[60vh] stops a huge note from swallowing the screen.
+  const autoGrow = useCallback(() => {
+    const el = taRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [])
+  useLayoutEffect(() => {
+    if (editing) autoGrow()
+  }, [editing, autoGrow])
 
   const startEdit = () => {
     setDraft(note.text)
@@ -55,11 +71,14 @@ export function NoteCard({
     >
       {editing ? (
         <textarea
+          ref={taRef}
           autoFocus
-          rows={Math.min(10, Math.max(3, draft.split('\n').length))}
-          className={inputCls}
+          className={`${inputCls} max-h-[60vh] min-h-20 resize-none overflow-auto`}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value)
+            autoGrow()
+          }}
           onBlur={saveEdit}
           onKeyDown={(e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -74,12 +93,26 @@ export function NoteCard({
           }}
         />
       ) : (
-        <p
-          onClick={startEdit}
-          className="cursor-text text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-200"
-        >
-          {note.text}
-        </p>
+        <>
+          <p
+            ref={textRef}
+            onClick={startEdit}
+            className={`cursor-text text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-200 ${
+              expanded ? 'line-clamp-none' : 'line-clamp-6'
+            }`}
+          >
+            {note.text}
+          </p>
+          {overflows && (
+            <button
+              type="button"
+              onClick={toggle}
+              className="mt-1 rounded px-1 text-[11px] font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+            >
+              {expanded ? 'See less' : 'See more…'}
+            </button>
+          )}
+        </>
       )}
       <footer className="mt-2 flex items-center gap-1.5">
         <button

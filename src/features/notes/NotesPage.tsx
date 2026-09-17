@@ -19,7 +19,7 @@ export function NotesPage() {
     return () => window.clearTimeout(timer)
   }, [noteFocusId, clearNoteFocus])
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-4">
+    <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 py-4 lg:max-w-4xl">
       <NoteCapture />
       {sorted.length === 0 ? (
         <EmptyState
