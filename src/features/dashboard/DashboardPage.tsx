@@ -4,6 +4,7 @@ import { tintedIconBtnCls as iconBtn } from '../../components/ui/swatches'
 import { reconcileLayout } from '../../lib/dashboard/layout'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
+import { CoffeeLink } from '../../components/CoffeeLink'
 import { TILE_REGISTRY } from './tiles'
 
 export function DashboardPage() {
@@ -101,6 +102,7 @@ export function DashboardPage() {
           )
         })}
       </div>
+      <CoffeeLink className="self-center text-xs text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-indigo-400" />
     </div>
   )
 }

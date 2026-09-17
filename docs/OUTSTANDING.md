@@ -6,7 +6,7 @@ they are collected so they can be worked through in one sitting.
 
 Status key: `[ ]` open · `[x]` done · `[~]` accepted, no action intended.
 
-Last updated: 2026-09-18 (during M36).
+Last updated: 2026-09-18 (end of the M32–M37 round).
 
 ---
 
@@ -96,3 +96,14 @@ running `npm run dev` and a human looking at the screen.
   (`~/.claude/plans/feature-change-or-new-validated-spark.md`). Needs a server,
   so it is the only item in the original list of ten that is not backendless.
   Roughly one milestone for the client and one for the Netlify Function.
+
+- [ ] **P. Buy Me a Coffee URL.** The link slot shipped dormant in M37:
+  `BUY_ME_A_COFFEE_URL` in `src/config.ts` is `''`, which renders nothing in
+  the footer and at the foot of the dashboard. Paste the real URL on that one
+  line when the page exists — README → "Support link". *(M37.)*
+- [ ] **Q. Cloudflare Pages cutover.** M37 landed the co-existence config only
+  (`.nvmrc`, the `CF_PAGES_COMMIT_SHA` fallback for the build id, README). The
+  site is still deployed from Netlify alone. Actually connecting the repo to
+  Cloudflare is deferred by decision; the thing to weigh first is the caveat in
+  README → "Deploy" — storage is per-origin, so a second URL is a second empty
+  app, not a mirror. *(M37.)*

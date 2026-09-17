@@ -72,7 +72,7 @@ Government of the HKSAR's open-data terms.
 ```sh
 npm install
 npm run dev        # http://localhost:5173
-npx vitest run     # 226 tests — `unit` in node, `dom` in jsdom
+npx vitest run     # 252 tests — `unit` in node, `dom` in jsdom
 npm run build && npm run preview
 ```
 
@@ -95,11 +95,44 @@ proxy, and the tests stay deterministic:
   warning icons behind the warning chip.
 - `node scripts/gen-icons.mjs` → the PWA app icons.
 
+## Support link
+
+The footer and the foot of the dashboard can carry a **Buy me a coffee** link.
+It ships switched off: `BUY_ME_A_COFFEE_URL` in `src/config.ts` is an empty
+string, and empty renders nothing rather than a dead link. To turn it on, put
+your URL between the quotes on that one line —
+
+```ts
+export const BUY_ME_A_COFFEE_URL: string = 'https://buymeacoffee.com/yourname'
+```
+
+— and deploy. That is the whole change: no setting to flip, no migration, and
+emptying the string again removes the link everywhere.
+
 ## Deploy
 
-Push to `main` → Netlify builds via `netlify.toml` (tests gate the deploy).
-Add `[skip netlify]` to a commit subject to push without spending a build.
-Rollback: `git revert`, or re-publish any previous deploy in the Netlify UI.
+Push to `main` → Netlify builds via `netlify.toml`, which runs
+`npx vitest run && npm run build`, so a red test stops the deploy rather than
+shipping past it. Add `[skip netlify]` to a commit subject to push without
+spending a build. Rollback: `git revert`, or re-publish any previous deploy in
+the Netlify UI. The Node version lives in `.nvmrc`.
+
+**The build is host-agnostic**: a static `dist/`, no server, no secrets, and no
+redirect rules to port (there is no router — everything serves from `/`).
+Cloudflare Pages runs the same repo with build command `npm run build`, output
+directory `dist`, and reads the same `.nvmrc`. Two differences worth knowing:
+each host names the commit sha differently, so `vite.config.ts` reads
+`COMMIT_REF` (Netlify), `CF_PAGES_COMMIT_SHA` (Cloudflare) and `GITHUB_SHA`
+(Actions) in turn to keep the footer's build id honest; and the skip token is
+`[skip netlify]` on Netlify but `[skip ci]` on Cloudflare.
+
+**Running both at once works, but they are two origins and browser storage is
+per-origin.** The Cloudflare URL opens as an empty app even though it is byte
+for byte the same build — none of the tasks, notes, bookmarks or backup-folder
+permission from the Netlify URL are visible to it. Moving means Settings →
+*Export backup file* on the old origin, *Restore from a backup file* on the
+new one, and installing the PWA again. Treat one origin as home and the other
+as a spare, never as two copies of the same desk.
 
 ## Work laptop setup (Windows 11 / Edge)
 

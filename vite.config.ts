@@ -35,7 +35,16 @@ export default defineConfig({
     }),
   ],
   define: {
-    __BUILD_ID__: JSON.stringify((process.env.COMMIT_REF ?? 'dev').slice(0, 7)),
+    // Each host names the commit differently, and the footer's build id is
+    // the only way to tell which deploy a browser is actually running.
+    __BUILD_ID__: JSON.stringify(
+      (
+        process.env.COMMIT_REF ?? // Netlify
+        process.env.CF_PAGES_COMMIT_SHA ?? // Cloudflare Pages
+        process.env.GITHUB_SHA ?? // GitHub Actions
+        'dev'
+      ).slice(0, 7),
+    ),
   },
   test: {
     passWithNoTests: true,

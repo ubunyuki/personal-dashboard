@@ -17,6 +17,7 @@ import { SettingsModal } from './features/settings/SettingsModal'
 import { HelpModal } from './features/help/HelpModal'
 import { RestorePrompt } from './features/settings/RestorePrompt'
 import { BackupBanner } from './features/settings/BackupBanner'
+import { CoffeeLink } from './components/CoffeeLink'
 import { useUiStore } from './store/uiStore'
 import { useThemeEffect } from './lib/theme'
 import { usePwaUpdatePoll } from './lib/usePwaUpdatePoll'
@@ -52,6 +53,7 @@ export default function App() {
       </main>
       <footer className="flex shrink-0 items-center justify-between border-t border-slate-200 px-3 py-1 text-[11px] text-slate-400 dark:border-slate-800 dark:text-slate-600">
         <span>build {__BUILD_ID__}</span>
+        <CoffeeLink className="hover:text-slate-600 dark:hover:text-slate-300" />
         <span>
           {persisted === null
             ? 'storage: checking…'
