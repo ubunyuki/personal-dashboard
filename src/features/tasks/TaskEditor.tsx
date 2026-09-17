@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Drawer } from '../../components/ui/Drawer'
 import { Field, inputCls } from '../../components/ui/Field'
+import { TimeInput } from '../../components/ui/TimeInput'
+import { TIME_INPUT_HINT, parseTimeInput } from '../../lib/dates/timeInput'
 import {
   allProjectTags,
   formatProjectTags,
@@ -45,7 +47,9 @@ export function TaskEditor() {
       status,
       priority,
       dueDate: dueDate || undefined,
-      dueTime: dueDate && dueTime ? dueTime : undefined,
+      // Normalised again here: Enter submits the form before the time
+      // field has a chance to blur and canonicalise itself.
+      dueTime: dueDate && dueTime ? (parseTimeInput(dueTime) ?? undefined) : undefined,
       projects: parseProjectTags(project),
     }
     if (!fields.title) return
@@ -119,14 +123,8 @@ export function TaskEditor() {
               onChange={(e) => setDueDate(e.target.value)}
             />
           </Field>
-          <Field label="Due time">
-            <input
-              type="time"
-              className={inputCls}
-              value={dueTime}
-              disabled={!dueDate}
-              onChange={(e) => setDueTime(e.target.value)}
-            />
+          <Field label="Due time" hint={TIME_INPUT_HINT}>
+            <TimeInput value={dueTime} disabled={!dueDate} onChange={setDueTime} />
           </Field>
         </div>
         <Field label="Project tags">

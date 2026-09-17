@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { format, parseISO } from 'date-fns'
 import { FileUp, FolderOpen, RotateCcw } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
@@ -92,7 +93,7 @@ export function RestorePrompt() {
       {env && summary ? (
         <div className="flex flex-col gap-3">
           <p className="text-sm">
-            This backup{summary.exportedAt ? ` from ${new Date(summary.exportedAt).toLocaleString()}` : ''} contains:
+            This backup{summary.exportedAt ? ` from ${format(parseISO(summary.exportedAt), 'd MMM yyyy HH:mm')}` : ''} contains:
           </p>
           <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm tabular-nums dark:bg-slate-800">
             Tasks: {summary.tasks} · Notes: {summary.notes} · Events: {summary.events} · Boards:{' '}

@@ -3,6 +3,8 @@ import { format } from 'date-fns'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import type { TaskPriority } from '../../types'
 import { inputCls } from '../../components/ui/Field'
+import { TimeInput } from '../../components/ui/TimeInput'
+import { parseTimeInput } from '../../lib/dates/timeInput'
 import { buildMonthGrid, hkHolidayName, parseLocalDate, toLocalDate } from '../../lib/dates/dates'
 import { useNow } from '../../lib/useNow'
 import { useAppStore } from '../../store/appStore'
@@ -101,7 +103,8 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
   const add = () => {
     const t = title.trim()
     if (!t) return
-    addEvent({ title: t, date: selected, time: time || undefined })
+    // Enter submits before the time field blurs, so parse here too.
+    addEvent({ title: t, date: selected, time: parseTimeInput(time) ?? undefined })
     setTitle('')
     setTime('')
   }
@@ -224,11 +227,10 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Add event…"
             />
-            <input
-              type="time"
-              className="w-24 shrink-0 rounded-md border border-slate-300 bg-white px-1.5 py-1.5 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            <TimeInput
+              className="w-24 shrink-0 rounded-md border border-slate-300 bg-white px-1.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               value={time}
-              onChange={(e) => setTime(e.target.value)}
+              onChange={setTime}
             />
             <button
               type="submit"

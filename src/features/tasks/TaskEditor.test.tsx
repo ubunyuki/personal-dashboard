@@ -72,3 +72,36 @@ describe('TaskEditor', () => {
     view.unmount()
   })
 })
+
+describe('TaskEditor due time', () => {
+  it('canonicalises a typed time, even when Enter submits before the blur', async () => {
+    const user = userEvent.setup()
+    resetStores()
+    openEditor('new')
+
+    await user.type(screen.getByLabelText('Title'), 'Standup')
+    await user.type(screen.getByLabelText('Due date'), '2026-09-20')
+    // Enter submits the form without the time field ever blurring, so the
+    // value has to be normalised on the way into the store as well.
+    await user.type(screen.getByLabelText('Due time'), '230pm{Enter}')
+
+    expect(useAppStore.getState().tasks[0]?.dueTime).toBe('14:30')
+  })
+
+  it('shows the canonical 24-hour form once the field blurs', async () => {
+    const user = userEvent.setup()
+    resetStores()
+    openEditor('new')
+
+    await user.type(screen.getByLabelText('Due date'), '2026-09-20')
+    await user.type(screen.getByLabelText('Due time'), '1430')
+    await user.tab()
+    expect(screen.getByLabelText('Due time')).toHaveValue('14:30')
+
+    // An unreadable entry clears instead of posing as a time that is set.
+    await user.clear(screen.getByLabelText('Due time'))
+    await user.type(screen.getByLabelText('Due time'), '99:99')
+    await user.tab()
+    expect(screen.getByLabelText('Due time')).toHaveValue('')
+  })
+})
