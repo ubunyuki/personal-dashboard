@@ -8,6 +8,7 @@ import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 import { BusStopRow } from '../bus/BusStopRow'
 import { useBusEtas } from '../bus/useBusEtas'
+import { useBusNameBackfill } from '../bus/useBusNameBackfill'
 
 /**
  * Live arrivals for the stops the user watches.
@@ -23,6 +24,7 @@ export function BusTile() {
   const stops = useMemo(() => sortBusStops(busStops), [busStops])
   const now = useNow(30_000)
   const feed = useBusEtas(stops)
+  useBusNameBackfill(stops, feed)
   if (stops.length === 0) return null
   return (
     <Card

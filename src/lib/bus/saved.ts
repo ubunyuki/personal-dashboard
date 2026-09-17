@@ -1,4 +1,4 @@
-import type { SavedBusStop } from '../../types'
+import type { BusLanguage, SavedBusStop } from '../../types'
 
 /**
  * Order and identity for the user's watched stops, following the same shape
@@ -44,6 +44,20 @@ export function moveBusStopIn(stops: SavedBusStop[], id: string, delta: -1 | 1):
   })
 }
 
+/**
+ * The stop's own name in the chosen language, and the same for the
+ * destination. Chinese falls back to English rather than to nothing: a stop
+ * saved before v6 has no Chinese name until useBusNameBackfill reaches it,
+ * and an English row beats a blank one.
+ */
+export const busStopName = (s: SavedBusStop, lang: BusLanguage): string =>
+  (lang === 'tc' ? s.stopNameTc : undefined) ?? s.stopName
+
+export const busStopDestination = (s: SavedBusStop, lang: BusLanguage): string =>
+  (lang === 'tc' ? s.destinationTc : undefined) ?? s.destination
+
 /** What the row and tile show as the stop's name: the user's own label wins,
- *  because "Home → Office" is why they saved it. */
-export const busStopTitle = (s: SavedBusStop): string => s.label?.trim() || s.stopName
+ *  because "Home → Office" is why they saved it — and a label is already in
+ *  whichever language they typed it in, so it is never translated. */
+export const busStopTitle = (s: SavedBusStop, lang: BusLanguage): string =>
+  s.label?.trim() || busStopName(s, lang)

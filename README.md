@@ -37,7 +37,8 @@ system that writes JSON snapshots to a OneDrive folder.
 - **Reminders bell** — overdue + due-soon tasks and today's events.
 - **Whiteboard** — Excalidraw, multiple boards, autosave, PNG/SVG download.
 - **Weather** — HKO official readings or Open-Meteo city; chip shows
-  location + temperature + humidity (full-name or short-code label).
+  location + temperature + humidity (中文, full English name, or short code —
+  Settings → Weather).
   Click the place name to switch location; click the readings for the
   HKO site.
 - **Weather warnings** — hoisted HKO warnings, and the “expected” special
@@ -49,7 +50,8 @@ system that writes JSON snapshots to a OneDrive folder.
 - **Bus arrivals** — the Bus tab searches KMB and Citybus routes, walks the
   stops of one and shows its live ETAs, which doubles as an ad-hoc lookup.
   Save a stop and it joins the dashboard tile, refreshing every minute while
-  the tab is open.
+  the tab is open. Stop and destination names read in 中文 by default —
+  Settings → Appearance switches them to English.
 - **Help** — in-app user guide (`?` or the help button next to Settings).
 - **Backups** — auto-snapshots to a picked folder (hourly on change, keeps
   newest 30), staleness nudges, manual export/restore, storage-clear tripwire.
@@ -76,7 +78,7 @@ npm run build && npm run preview
 
 ## Bundled data
 
-Three generators pull third-party data at development time and commit the
+Four generators pull third-party data at development time and commit the
 result, so the running app never fetches it, works offline and behind the work
 proxy, and the tests stay deterministic:
 
@@ -84,6 +86,11 @@ proxy, and the tests stay deterministic:
   1823 feed, currently covering 2025–2027. **Re-run annually**: next year's
   holidays are gazetted each May, and the calendar quietly stops marking them
   past the last generated year. This is the only recurring upkeep the app has.
+- `node scripts/gen-hko-station-names.mjs` → `src/lib/weather/stationNames.ts`,
+  HKO's English station names paired with their Chinese ones. The feed carries
+  no station ids, so the pairing is **by position** across two fetches of the
+  same endpoint; the script refuses to write a table it cannot verify. Re-run
+  when HKO adds a station.
 - `node scripts/fetch-hko-icons.mjs` → `public/hko/*.gif`, the official
   warning icons behind the warning chip.
 - `node scripts/gen-icons.mjs` → the PWA app icons.

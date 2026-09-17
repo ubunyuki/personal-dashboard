@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { SavedBusStop } from '../../types'
-import { busStopKey, busStopTitle, moveBusStopIn, sortBusStops } from './saved'
+import {
+  busStopDestination,
+  busStopKey,
+  busStopName,
+  busStopTitle,
+  moveBusStopIn,
+  sortBusStops,
+} from './saved'
 
 let n = 0
 function stop(over: Partial<SavedBusStop> = {}): SavedBusStop {
@@ -58,7 +65,28 @@ describe('moveBusStopIn', () => {
 
 describe('busStopTitle', () => {
   it('prefers the user label and ignores one that is only whitespace', () => {
-    expect(busStopTitle(stop({ label: 'Home → Office' }))).toBe('Home → Office')
-    expect(busStopTitle(stop({ stopName: 'SAU MAU PING', label: '   ' }))).toBe('SAU MAU PING')
+    expect(busStopTitle(stop({ label: 'Home → Office' }), 'en')).toBe('Home → Office')
+    expect(busStopTitle(stop({ stopName: 'SAU MAU PING', label: '   ' }), 'en')).toBe('SAU MAU PING')
+  })
+
+  it('shows the Chinese name when asked for it, and a label in either language', () => {
+    const s = stop({ stopName: 'SAU MAU PING', stopNameTc: '秀茂坪' })
+    expect(busStopTitle(s, 'tc')).toBe('秀茂坪')
+    expect(busStopTitle(s, 'en')).toBe('SAU MAU PING')
+    // A label is already in whatever language it was typed in.
+    expect(busStopTitle(stop({ stopNameTc: '秀茂坪', label: 'Home' }), 'tc')).toBe('Home')
+  })
+})
+
+describe('busStopName / busStopDestination', () => {
+  it('falls back to English for a stop saved before the Chinese names were', () => {
+    const s = stop({ stopName: 'SAU MAU PING', destination: 'STAR FERRY' })
+    expect(busStopName(s, 'tc')).toBe('SAU MAU PING')
+    expect(busStopDestination(s, 'tc')).toBe('STAR FERRY')
+  })
+
+  it('uses the Chinese destination once the backfill has stored one', () => {
+    expect(busStopDestination(stop({ destinationTc: '尖沙咀碼頭' }), 'tc')).toBe('尖沙咀碼頭')
+    expect(busStopDestination(stop({ destinationTc: '尖沙咀碼頭' }), 'en')).toBe('STAR FERRY')
   })
 })

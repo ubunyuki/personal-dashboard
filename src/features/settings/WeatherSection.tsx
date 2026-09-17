@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Field, inputCls } from '../../components/ui/Field'
 import { Button } from '../../components/ui/Button'
-import type { WeatherLocation, WeatherSource } from '../../types'
+import type { WeatherLocation, WeatherSettings, WeatherSource } from '../../types'
 import { geocodeCity, listHkoStations } from '../../lib/weather/providers'
 import { playChime, primeChime } from '../../lib/weather/chime'
+import { stationNameTc } from '../../lib/weather/stationCodes'
 import { warningSettings } from '../../lib/weather/warnings'
 import { useAppStore } from '../../store/appStore'
 
@@ -105,11 +106,14 @@ export function WeatherSection() {
             <Field label="Chip label">
               <select
                 className={inputCls}
-                value={weather.labelStyle ?? 'name'}
+                value={weather.labelStyle ?? 'tc'}
                 onChange={(e) =>
-                  updateSettings({ weather: { labelStyle: e.target.value as 'name' | 'code' } })
+                  updateSettings({
+                    weather: { labelStyle: e.target.value as WeatherSettings['labelStyle'] },
+                  })
                 }
               >
+                <option value="tc">中文</option>
                 <option value="name">Full name</option>
                 <option value="code">Short code</option>
               </select>
@@ -122,9 +126,14 @@ export function WeatherSection() {
                 value={weather.hkoStation}
                 onChange={(e) => updateSettings({ weather: { hkoStation: e.target.value } })}
               >
+                {/* The value stays the English name — it is the key the feed
+                    and stationCodes.ts are both indexed by. Only the label
+                    follows the chip setting. */}
                 {(stations ?? [weather.hkoStation]).map((s) => (
                   <option key={s} value={s}>
-                    {s}
+                    {weather.labelStyle === 'name' || weather.labelStyle === 'code'
+                      ? s
+                      : stationNameTc(s)}
                   </option>
                 ))}
               </select>

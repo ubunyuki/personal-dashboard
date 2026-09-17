@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import type { ConditionIcon } from '../../lib/weather/conditions'
-import { shortLabel } from '../../lib/weather/stationCodes'
+import { stationLabel } from '../../lib/weather/stationCodes'
 import { getWeather, isWeatherStale } from '../../lib/weather/weather'
 import type { WeatherNow } from '../../lib/weather/providers'
 import { useAppStore } from '../../store/appStore'
@@ -83,9 +83,7 @@ export function WeatherChip() {
       ? weather.source === 'open-meteo'
         ? 'Pick city'
         : null
-      : (weather.labelStyle ?? 'name') === 'code'
-        ? shortLabel(selectedName)
-        : selectedName
+      : stationLabel(selectedName, weather.labelStyle ?? 'tc')
   const updated =
     ok?.observedAt && !Number.isNaN(Date.parse(ok.observedAt))
       ? ` · updated ${format(new Date(ok.observedAt), 'HH:mm')}`

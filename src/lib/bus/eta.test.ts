@@ -86,6 +86,30 @@ describe('parseKmbRoutes', () => {
     ])
   })
 
+  it('reads the Chinese names out of the same row', () => {
+    const out = parseKmbRoutes({
+      data: [
+        {
+          route: '1A',
+          bound: 'O',
+          service_type: '1',
+          orig_en: 'SAU MAU PING',
+          dest_en: 'STAR FERRY',
+          orig_tc: '秀茂坪',
+          dest_tc: '尖沙咀碼頭',
+        },
+      ],
+    })
+    expect(out[0]).toMatchObject({ originTc: '秀茂坪', destinationTc: '尖沙咀碼頭' })
+  })
+
+  it('leaves the Chinese names undefined when the feed omits them', () => {
+    const out = parseKmbRoutes({
+      data: [{ route: '1A', bound: 'O', orig_en: 'A', dest_en: 'B' }],
+    })
+    expect(out[0].destinationTc).toBeUndefined()
+  })
+
   it('returns nothing for a shape it does not recognise', () => {
     expect(parseKmbRoutes(null)).toEqual([])
     expect(parseKmbRoutes({ data: 'nope' })).toEqual([])
@@ -107,6 +131,22 @@ describe('parseCtbRoutes', () => {
       destination: 'Central (Macao Ferry)',
     })
     expect(out[0].serviceType).toBeUndefined()
+  })
+
+  it('reverses the Chinese pair along with the English one', () => {
+    const out = parseCtbRoutes({
+      data: [
+        {
+          route: '1',
+          orig_en: 'Central (Macao Ferry)',
+          dest_en: 'Happy Valley (Upper)',
+          orig_tc: '中環（港澳碼頭）',
+          dest_tc: '跑馬地（上）',
+        },
+      ],
+    })
+    expect(out[0]).toMatchObject({ originTc: '中環（港澳碼頭）', destinationTc: '跑馬地（上）' })
+    expect(out[1]).toMatchObject({ originTc: '跑馬地（上）', destinationTc: '中環（港澳碼頭）' })
   })
 })
 
@@ -182,6 +222,12 @@ describe('parseStopInfo', () => {
     ).toEqual({ stopId: 'A3ADFCDF8487ADB9', name: 'SAU MAU PING (CENTRAL) (KT975)' })
   })
 
+  it('reads the Chinese name when the payload carries one', () => {
+    expect(
+      parseStopInfo({ data: { stop: 'X', name_en: 'SAU MAU PING', name_tc: '秀茂坪' } }),
+    ).toEqual({ stopId: 'X', name: 'SAU MAU PING', nameTc: '秀茂坪' })
+  })
+
   it('is null for a list, a miss, or a nameless stop', () => {
     expect(parseStopInfo({ data: [] })).toBeNull()
     expect(parseStopInfo({})).toBeNull()
@@ -213,6 +259,28 @@ describe('parseEtas', () => {
     expect(r.etas).toEqual([
       { at: null, minutes: null, remark: undefined, destination: 'STAR FERRY' },
     ])
+  })
+
+  it('carries the Chinese destination every arrival row ships with', () => {
+    const r = parseEtas(
+      {
+        data: [
+          {
+            dir: 'O',
+            service_type: 1,
+            eta_seq: 1,
+            eta: '2026-09-17T01:22:00+08:00',
+            dest_en: 'STAR FERRY',
+            dest_tc: '尖沙咀碼頭',
+          },
+        ],
+      },
+      { direction: 'outbound', serviceType: '1' },
+      NOW,
+    )
+    // This is what gives a stop saved before v6 its Chinese destination back
+    // without a single extra request — see useBusNameBackfill.
+    expect(r.etas[0].destinationTc).toBe('尖沙咀碼頭')
   })
 
   it('drops other KMB service types on a shared stop', () => {

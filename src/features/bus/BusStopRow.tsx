@@ -3,7 +3,7 @@ import { Check, ChevronDown, ChevronUp, Pencil, Trash2, X } from 'lucide-react'
 import { inputCls } from '../../components/ui/Field'
 import { tintedIconBtnCls as iconBtn } from '../../components/ui/swatches'
 import { etaSummary, formatEta, isFeedStale, minutesUntil, type BusEtaResult } from '../../lib/bus/eta'
-import { busStopTitle } from '../../lib/bus/saved'
+import { busStopDestination, busStopName, busStopTitle } from '../../lib/bus/saved'
 import { useAppStore } from '../../store/appStore'
 import type { SavedBusStop } from '../../types'
 import { operatorChipCls, operatorName } from './operator'
@@ -73,6 +73,7 @@ export function BusStopRow({
   const moveBusStop = useAppStore((s) => s.moveBusStop)
   const removeBusStop = useAppStore((s) => s.removeBusStop)
   const setBusStopLabel = useAppStore((s) => s.setBusStopLabel)
+  const lang = useAppStore((s) => s.settings.busStopLanguage ?? 'tc')
   const [draft, setDraft] = useState<string | null>(null)
 
   const commit = () => {
@@ -90,14 +91,14 @@ export function BusStopRow({
       </span>
       <div className="min-w-0 flex-1">
         {draft === null ? (
-          <p className="truncate text-sm">{busStopTitle(stop)}</p>
+          <p className="truncate text-sm">{busStopTitle(stop, lang)}</p>
         ) : (
           <input
             autoFocus
             className={`${inputCls} py-0.5 text-sm`}
             aria-label="Stop name"
             value={draft}
-            placeholder={stop.stopName}
+            placeholder={busStopName(stop, lang)}
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commit}
             onKeyDown={(e) => {
@@ -107,8 +108,8 @@ export function BusStopRow({
           />
         )}
         <p className="truncate text-[11px] text-slate-400 dark:text-slate-500">
-          to {stop.destination}
-          {stop.label !== undefined && ` · ${stop.stopName}`}
+          to {busStopDestination(stop, lang)}
+          {stop.label !== undefined && ` · ${busStopName(stop, lang)}`}
         </p>
       </div>
       <BusArrivals result={result} now={now} />

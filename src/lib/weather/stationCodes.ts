@@ -1,3 +1,6 @@
+import type { WeatherSettings } from '../../types'
+import { HKO_STATION_NAMES_TC } from './stationNames'
+
 /** Short codes for common HKO temperature stations, keyed by the exact
  *  display name the rhrread feed uses (the feed exposes no station ids). */
 export const HKO_STATION_CODES: Record<string, string> = {
@@ -43,4 +46,16 @@ export function deriveInitials(name: string): string {
  *  (which also covers Open-Meteo city names). */
 export function shortLabel(name: string): string {
   return HKO_STATION_CODES[name] ?? deriveInitials(name)
+}
+
+/** The station's Chinese name, English when there is none — Open-Meteo
+ *  cities and any station HKO added since stationNames.ts was generated. */
+export const stationNameTc = (name: string): string => HKO_STATION_NAMES_TC[name] ?? name
+
+/** What the status-bar chip shows for the selected place. The setting is
+ *  display-only: the English name stays the identity key everywhere else. */
+export function stationLabel(name: string, style: WeatherSettings['labelStyle']): string {
+  if (style === 'code') return shortLabel(name)
+  if (style === 'name') return name
+  return stationNameTc(name)
 }

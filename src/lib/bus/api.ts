@@ -80,6 +80,25 @@ export async function loadRouteStops(v: BusRouteVariant): Promise<BusStopInfo[]>
   })
 }
 
+/**
+ * One stop's names, on its own rather than as part of a route.
+ *
+ * loadRouteStops already fetches this for every stop on a route; this is the
+ * single-stop door into the same endpoint, used to give a stop saved before
+ * v6 its Chinese name without making the user add it again. Cached daily
+ * under its own key, so the backfill costs one request per stop, once.
+ */
+export async function loadStopInfo(
+  operator: BusOperator,
+  stopId: string,
+): Promise<BusStopInfo | null> {
+  return cachedDaily(`bus-stop:${operator}:${stopId}`, async () =>
+    parseStopInfo(
+      await getJson(operator === 'KMB' ? `${KMB}/stop/${stopId}` : `${CTB}/stop/${stopId}`),
+    ),
+  )
+}
+
 export interface EtaQuery {
   operator: BusOperator
   route: string

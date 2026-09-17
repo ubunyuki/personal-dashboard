@@ -6,7 +6,7 @@ they are collected so they can be worked through in one sitting.
 
 Status key: `[ ]` open · `[x]` done · `[~]` accepted, no action intended.
 
-Last updated: 2026-09-17 (during M31).
+Last updated: 2026-09-18 (during M36).
 
 ---
 
@@ -28,8 +28,9 @@ running `npm run dev` and a human looking at the screen.
   horizontally; the page itself does not, and the main content stays centred.
   *(Plan check 1 — M23. Re-check after M30, which adds a fifth tab.)*
 - [ ] **D. Old backup restores.** Restore a pre-change (v3) backup file and
-  confirm the v3 → v5 path lands `weekStartsOn: 0` and converts single project
-  tags into arrays. *(Plan check 2 — M24/M28.)*
+  confirm the v3 → v6 path lands `weekStartsOn: 0`, converts single project
+  tags into arrays, and leaves the weather chip on 中文.
+  *(Plan check 2 — M24/M28, extended in M36.)*
 - [ ] **E. Calendar colours.** Sundays and gazetted holidays render red under
   **both** week-start settings; specifically check the Apr 3–7 2026 five-day
   block. *(Plan check 3 — M25.)*
@@ -40,6 +41,12 @@ running `npm run dev` and a human looking at the screen.
   contains no bus route/stop cache, and an exported envelope contains
   `busStops` and `dashboardLayout` but **no** cached API data.
   *(Plan check 6 — M30.)*
+
+- [ ] **N. Chinese names on an install that predates them.** Hard-reload with
+  existing data and confirm the v6 migration flipped the stored chip label to
+  中文 rather than leaving it on English, and that saved bus stops pick up
+  their Chinese names (the stop name within a poll or two, the destination on
+  the first arrival that carries one). *(M36.)*
 
 ## 2. Lint warnings
 
@@ -70,6 +77,11 @@ running `npm run dev` and a human looking at the screen.
 
 ## 4. Recurring maintenance
 
+- [ ] **O. `gen-hko-station-names` re-run.** `src/lib/weather/stationNames.ts`
+  pairs HKO's English and Chinese station lists **by position** and currently
+  covers 27 stations. Re-run `node scripts/gen-hko-station-names.mjs` when HKO
+  adds a station — the script refuses to write a misaligned table, so a failure
+  there is the signal, not a silent wrong name. *(M36.)*
 - [ ] **K. Annual `gen-hk-holidays` re-run.** `src/lib/dates/hkHolidays.ts` is
   generated from the 1823 iCal feed and currently covers **2025–2027**. Next
   year's holidays are gazetted each May, so re-run

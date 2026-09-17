@@ -36,6 +36,25 @@ describe('runMigrations', () => {
     expect(out.tasks.every((t) => t.projects === undefined)).toBe(true)
   })
 
+  it('moves a v5 install onto Chinese station names', () => {
+    // defaultSettings() had already written 'name' into everyone's stored
+    // settings, so this rewrite is the only thing that reaches them.
+    const out = runMigrations(
+      { settings: { ...defaultSettings(), weather: { ...defaultSettings().weather, labelStyle: 'name' } } },
+      5,
+    )
+    expect(out.settings.weather.labelStyle).toBe('tc')
+    expect(out.settings.busStopLanguage).toBe('tc')
+  })
+
+  it('leaves a v5 short-code chip alone, because somebody chose it', () => {
+    const out = runMigrations(
+      { settings: { ...defaultSettings(), weather: { ...defaultSettings().weather, labelStyle: 'code' } } },
+      5,
+    )
+    expect(out.settings.weather.labelStyle).toBe('code')
+  })
+
   it('returns complete data for empty input', () => {
     expect(runMigrations({}, 1)).toEqual(defaultAppData())
   })

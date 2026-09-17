@@ -1,4 +1,4 @@
-import type { BusDirection, BusOperator } from '../../types'
+import type { BusDirection, BusLanguage, BusOperator } from '../../types'
 
 /**
  * Pure core of the bus feature: everything that turns an operator's JSON into
@@ -23,11 +23,18 @@ export interface BusRouteVariant {
   serviceType?: string
   origin: string
   destination: string
+  /** Both operators ship the Chinese names in the SAME payload as the English
+   *  ones, so reading them costs nothing extra. Optional because a feed that
+   *  changes shape must degrade to English, never to a blank row. */
+  originTc?: string
+  destinationTc?: string
 }
 
 export interface BusStopInfo {
   stopId: string
   name: string
+  /** See BusRouteVariant.originTc — same payload, same reasoning. */
+  nameTc?: string
 }
 
 export interface BusEta {
@@ -39,6 +46,10 @@ export interface BusEta {
   /** Operator remark, e.g. "Scheduled Bus", "Final Bus". */
   remark?: string
   destination?: string
+  /** The destination in Chinese. Every arrival carries it, which is how a
+   *  stop saved before the names were stored gets its Chinese destination
+   *  back without a single extra request — see useBusNameBackfill. */
+  destinationTc?: string
 }
 
 export interface BusEtaResult {
@@ -78,6 +89,8 @@ export function parseKmbRoutes(raw: unknown): BusRouteVariant[] {
       serviceType: str(r.service_type),
       origin: str(r.orig_en) ?? '',
       destination: str(r.dest_en) ?? '',
+      originTc: str(r.orig_tc),
+      destinationTc: str(r.dest_tc),
     })
   }
   return out
@@ -94,11 +107,42 @@ export function parseCtbRoutes(raw: unknown): BusRouteVariant[] {
     if (!route) continue
     const orig = str(r.orig_en) ?? ''
     const dest = str(r.dest_en) ?? ''
-    out.push({ operator: 'CTB', route, direction: 'outbound', origin: orig, destination: dest })
-    out.push({ operator: 'CTB', route, direction: 'inbound', origin: dest, destination: orig })
+    const origTc = str(r.orig_tc)
+    const destTc = str(r.dest_tc)
+    out.push({
+      operator: 'CTB',
+      route,
+      direction: 'outbound',
+      origin: orig,
+      destination: dest,
+      originTc: origTc,
+      destinationTc: destTc,
+    })
+    out.push({
+      operator: 'CTB',
+      route,
+      direction: 'inbound',
+      origin: dest,
+      destination: orig,
+      originTc: destTc,
+      destinationTc: origTc,
+    })
   }
   return out
 }
+
+/** What the picker shows, in the language the user reads. English is the
+ *  fallback everywhere: a feed that omits the Chinese name must still render
+ *  a row. Saved stops have their own pair in lib/bus/saved.ts — they read
+ *  from stored copies rather than from a live feed. */
+export const variantOrigin = (v: BusRouteVariant, lang: BusLanguage): string =>
+  (lang === 'tc' ? v.originTc : undefined) ?? v.origin
+
+export const variantDestination = (v: BusRouteVariant, lang: BusLanguage): string =>
+  (lang === 'tc' ? v.destinationTc : undefined) ?? v.destination
+
+export const stopInfoName = (s: BusStopInfo, lang: BusLanguage): string =>
+  (lang === 'tc' ? s.nameTc : undefined) ?? s.name
 
 /** Stable identity for a variant — a React key, and how a saved stop is
  *  matched back to the route it came from. */
@@ -162,7 +206,7 @@ export function parseStopInfo(raw: unknown): BusStopInfo | null {
   const row = d as Record<string, unknown>
   const stopId = str(row.stop)
   const name = str(row.name_en)
-  return stopId && name ? { stopId, name } : null
+  return stopId && name ? { stopId, name, nameTc: str(row.name_tc) } : null
 }
 
 // ---- arrivals ----
@@ -206,6 +250,7 @@ export function parseEtas(
       minutes: at === null ? null : minutesUntil(at, now),
       remark: str(r.rmk_en),
       destination: str(r.dest_en),
+      destinationTc: str(r.dest_tc),
     }
   })
   return { etas, feedAt }

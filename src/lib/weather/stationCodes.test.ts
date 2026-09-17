@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { deriveInitials, shortLabel } from './stationCodes'
+import { deriveInitials, shortLabel, stationLabel } from './stationCodes'
 
 describe('shortLabel', () => {
   it('uses the curated code when one exists', () => {
@@ -25,5 +25,20 @@ describe('deriveInitials', () => {
 
   it('handles blank input', () => {
     expect(deriveInitials('   ')).toBe('')
+  })
+})
+
+describe('stationLabel', () => {
+  it('reads Chinese by default and English when asked', () => {
+    expect(stationLabel('Sha Tin', 'tc')).toBe('沙田')
+    expect(stationLabel('Sha Tin', undefined)).toBe('沙田')
+    expect(stationLabel('Sha Tin', 'name')).toBe('Sha Tin')
+    expect(stationLabel('Sha Tin', 'code')).toBe('ST')
+  })
+
+  it('keeps the English name for a place the table does not know', () => {
+    // Open-Meteo cities, and any station HKO adds after stationNames.ts was
+    // generated — a blank chip would be worse than an English one.
+    expect(stationLabel('Reykjavík', 'tc')).toBe('Reykjavík')
   })
 })

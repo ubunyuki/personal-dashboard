@@ -3,7 +3,15 @@ import { ArrowLeft, Check, Plus, Search } from 'lucide-react'
 import { Card } from '../../components/ui/Card'
 import { inputCls } from '../../components/ui/Field'
 import { loadRouteStops, loadRoutes } from '../../lib/bus/api'
-import { searchRoutes, variantKey, type BusRouteVariant, type BusStopInfo } from '../../lib/bus/eta'
+import {
+  searchRoutes,
+  stopInfoName,
+  variantDestination,
+  variantKey,
+  variantOrigin,
+  type BusRouteVariant,
+  type BusStopInfo,
+} from '../../lib/bus/eta'
 import { busStopKey } from '../../lib/bus/saved'
 import { useNow } from '../../lib/useNow'
 import { useAppStore } from '../../store/appStore'
@@ -30,6 +38,7 @@ const rowCls =
 export function BusStopPicker() {
   const saved = useAppStore((s) => s.busStops)
   const addBusStop = useAppStore((s) => s.addBusStop)
+  const lang = useAppStore((s) => s.settings.busStopLanguage ?? 'tc')
 
   const [operator, setOperator] = useState<BusOperator>('KMB')
   const [query, setQuery] = useState('')
@@ -132,7 +141,9 @@ export function BusStopPicker() {
       serviceType: variant.serviceType,
       stopId: picked.stopId,
       stopName: picked.name,
+      stopNameTc: picked.nameTc,
       destination: variant.destination,
+      destinationTc: variant.destinationTc,
     })
   }
 
@@ -193,7 +204,9 @@ export function BusStopPicker() {
                 >
                   {v.route}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-sm">to {v.destination}</span>
+                <span className="min-w-0 flex-1 truncate text-sm">
+                  to {variantDestination(v, lang)}
+                </span>
                 {v.serviceType !== undefined && v.serviceType !== '1' && (
                   <span className="shrink-0 text-[11px] text-slate-400 dark:text-slate-500">
                     variant {v.serviceType}
@@ -219,7 +232,7 @@ export function BusStopPicker() {
                 {variant.route}
               </span>
               <span className="min-w-0 flex-1 truncate text-sm">
-                {variant.origin} → {variant.destination}
+                {variantOrigin(variant, lang)} → {variantDestination(variant, lang)}
               </span>
             </button>
           </div>
@@ -242,7 +255,7 @@ export function BusStopPicker() {
                 <span className="w-5 shrink-0 text-right text-[11px] tabular-nums text-slate-400 dark:text-slate-500">
                   {i + 1}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-sm">{s.name}</span>
+                <span className="min-w-0 flex-1 truncate text-sm">{stopInfoName(s, lang)}</span>
               </button>
             ))}
           </div>

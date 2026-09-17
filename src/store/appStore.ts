@@ -90,6 +90,11 @@ export type AppStore = PersistedAppData & {
   moveBusStop: (id: string, delta: -1 | 1) => void
   /** Empty or blank clears the override and returns to the operator's name. */
   setBusStopLabel: (id: string, label: string) => void
+  /** Fill in Chinese names the operator published after this stop was saved.
+   *  Operator data arriving late rather than an edit, so it moves neither
+   *  updatedAt nor lastChangeAt — the backup banner must not cry wolf over a
+   *  name the user never touched. Existing values are never overwritten. */
+  setBusStopNames: (id: string, names: { stopNameTc?: string; destinationTc?: string }) => void
   /** Swap a dashboard tile with its neighbour (delta -1 = up, +1 = down). */
   moveDashboardTile: (id: TileId, delta: -1 | 1) => void
   /** Hide or show a tile; hidden tiles keep their slot in the order. */
@@ -423,6 +428,20 @@ export const useAppStore = create<AppStore>()(
               b.id === id ? { ...b, label: trimmed === '' ? undefined : trimmed, updatedAt: at } : b,
             ),
             lastChangeAt: at,
+          }
+        }),
+
+      setBusStopNames: (id, names) =>
+        set((s) => {
+          const stop = s.busStops.find((b) => b.id === id)
+          if (!stop) return {}
+          const stopNameTc = stop.stopNameTc ?? names.stopNameTc
+          const destinationTc = stop.destinationTc ?? names.destinationTc
+          if (stopNameTc === stop.stopNameTc && destinationTc === stop.destinationTc) return {}
+          return {
+            busStops: s.busStops.map((b) =>
+              b.id === id ? { ...b, stopNameTc, destinationTc } : b,
+            ),
           }
         }),
 

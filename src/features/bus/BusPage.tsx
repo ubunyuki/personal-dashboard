@@ -8,6 +8,7 @@ import { useAppStore } from '../../store/appStore'
 import { BusStopPicker } from './BusStopPicker'
 import { BusStopRow } from './BusStopRow'
 import { useBusEtas } from './useBusEtas'
+import { useBusNameBackfill } from './useBusNameBackfill'
 
 /**
  * The Bus tab: the watched stops with their controls, and the picker for
@@ -22,6 +23,7 @@ export function BusPage() {
   const stops = useMemo(() => sortBusStops(busStops), [busStops])
   const now = useNow(30_000)
   const feed = useBusEtas(stops)
+  useBusNameBackfill(stops, feed)
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4">
       <div className="grid items-start gap-3 md:grid-cols-2">

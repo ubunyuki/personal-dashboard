@@ -10,10 +10,11 @@ export function defaultSettings(): Settings {
       source: 'hko',
       hkoStation: 'Hong Kong Observatory',
       unit: 'celsius',
-      labelStyle: 'name',
+      labelStyle: 'tc',
       warnings: { enabled: true, notify: true, sound: true },
     },
     weekStartsOn: 0,
+    busStopLanguage: 'tc',
   }
 }
 
@@ -55,6 +56,16 @@ const steps: Record<number, (d: Partial<PersistedAppData>) => Partial<PersistedA
       }),
     }
   },
+  // v5 → v6: Hong Kong names are shown in Chinese for EVERYONE, not just new
+  // installs — defaultSettings() already wrote labelStyle: 'name' into every
+  // stored settings object, so changing the default alone would be a no-op.
+  // Only the untouched default is rewritten: 'code' is a choice somebody made
+  // on purpose. busStopLanguage is absent everywhere, so the defaults spread
+  // in runMigrations gives it 'tc' without a line here.
+  5: (d) =>
+    d.settings?.weather?.labelStyle === 'name'
+      ? { ...d, settings: { ...d.settings, weather: { ...d.settings.weather, labelStyle: 'tc' } } }
+      : d,
 }
 
 /**

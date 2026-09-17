@@ -5,7 +5,7 @@
  * - date: LOCAL calendar string 'yyyy-MM-dd'; time: 'HH:mm' (24h).
  *   Parse with date-fns, never `new Date('yyyy-MM-dd')` (that is UTC midnight).
  */
-export const SCHEMA_VERSION = 5
+export const SCHEMA_VERSION = 6
 
 export type TaskStatus = 'todo' | 'in-progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
@@ -144,8 +144,9 @@ export interface WeatherSettings {
   hkoStation: string
   location?: WeatherLocation
   unit: 'celsius' | 'fahrenheit'
-  /** Chip label style: full place name (default) or a short code like "ST". */
-  labelStyle?: 'name' | 'code'
+  /** Chip label style: the Chinese name (default), the full English place
+   *  name, or a short code like "ST". */
+  labelStyle?: 'name' | 'code' | 'tc'
   warnings?: WarningSettings
 }
 
@@ -155,6 +156,9 @@ export interface Settings {
   /** 0 = Sunday, 1 = Monday. Threaded into every week calculation — never
    *  hardcode it, or the dashboard and the review drawer can disagree. */
   weekStartsOn: 0 | 1
+  /** Which name a saved bus stop shows. Defaults to Chinese: these are Hong
+   *  Kong street names, and the shelter itself is signed in Chinese. */
+  busStopLanguage?: BusLanguage
 }
 
 /**
@@ -185,6 +189,9 @@ export type BusOperator = 'KMB' | 'CTB'
  *  what CTB's own URLs use and what reads at a glance in stored data. */
 export type BusDirection = 'outbound' | 'inbound'
 
+/** Which of the two names the operators publish gets shown. */
+export type BusLanguage = 'tc' | 'en'
+
 /**
  * A bus stop the user watches. Stop and destination names are COPIED in
  * rather than looked up: the tile has to render the moment the dashboard
@@ -201,6 +208,11 @@ export interface SavedBusStop {
   stopId: string
   stopName: string
   destination: string
+  /** The same two names in Chinese. Optional because stops saved before v6
+   *  have neither — useBusNameBackfill fills them in from the feeds, and
+   *  until it does the row falls back to English rather than showing a gap. */
+  stopNameTc?: string
+  destinationTc?: string
   /** User's own name for the stop, e.g. "Home → Office". */
   label?: string
   order?: number

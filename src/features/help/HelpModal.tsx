@@ -181,6 +181,7 @@ export function HelpModal() {
               <Li>The live times appear before you save anything — handy for a one-off</Li>
               <Li>“Add” puts the stop on the dashboard; arrows reorder, pencil renames</Li>
               <Li>Times are the operators' own estimates, refreshed every minute</Li>
+              <Li>Names show in 中文; Settings → Appearance switches them to English</Li>
             </ul>
           </HelpCard>
 
@@ -188,7 +189,7 @@ export function HelpModal() {
             <ul className="flex flex-col gap-1">
               <Li>Click the place name to switch station or city</Li>
               <Li>Click the readings to open the HKO site</Li>
-              <Li>Full-name or short-code label — set in Settings</Li>
+              <Li>Chip label in 中文, full English name, or short code — set in Settings</Li>
               <Li>HKO blocked at work? Switch the source to Open-Meteo</Li>
             </ul>
           </HelpCard>

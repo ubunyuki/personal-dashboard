@@ -3,7 +3,7 @@ import { Modal } from '../../components/ui/Modal'
 import { Field, inputCls } from '../../components/ui/Field'
 import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
-import type { Settings } from '../../types'
+import type { BusLanguage, Settings } from '../../types'
 import { BackupSection } from './BackupSection'
 import { WeatherSection } from './WeatherSection'
 
@@ -23,6 +23,7 @@ export function SettingsModal() {
   const persisted = useUiStore((s) => s.storagePersisted)
   const theme = useAppStore((s) => s.settings.theme)
   const weekStartsOn = useAppStore((s) => s.settings.weekStartsOn)
+  const busStopLanguage = useAppStore((s) => s.settings.busStopLanguage ?? 'tc')
   const updateSettings = useAppStore((s) => s.updateSettings)
   return (
     <Modal title="Settings" onClose={close}>
@@ -51,6 +52,19 @@ export function SettingsModal() {
           >
             <option value={0}>Sunday</option>
             <option value={1}>Monday</option>
+          </select>
+        </Field>
+        <Field
+          label="Bus stop names"
+          hint="Which of the two names the operators publish the bus tile shows."
+        >
+          <select
+            className={inputCls}
+            value={busStopLanguage}
+            onChange={(e) => updateSettings({ busStopLanguage: e.target.value as BusLanguage })}
+          >
+            <option value="tc">中文</option>
+            <option value="en">English</option>
           </select>
         </Field>
       </Section>
