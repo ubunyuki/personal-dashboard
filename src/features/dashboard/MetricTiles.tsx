@@ -1,6 +1,9 @@
+import { useMemo } from 'react'
 import { ChevronRight } from 'lucide-react'
-import type { Metrics } from '../../store/selectors'
+import { metrics as computeMetrics, type Metrics } from '../../store/selectors'
 import { Card } from '../../components/ui/Card'
+import { useNow } from '../../lib/useNow'
+import { useAppStore } from '../../store/appStore'
 import { useUiStore } from '../../store/uiStore'
 
 function Tile({
@@ -40,4 +43,14 @@ export function MetricTiles({ metrics }: { metrics: Metrics }) {
       <Tile label="Overdue" value={metrics.overdue} alert />
     </div>
   )
+}
+
+/** Dashboard entry point: the tile registry renders this, MetricTiles above
+ *  stays a pure view of a Metrics value. */
+export function MetricsTile() {
+  const tasks = useAppStore((s) => s.tasks)
+  const weekStartsOn = useAppStore((s) => s.settings.weekStartsOn)
+  const now = useNow()
+  const m = useMemo(() => computeMetrics(tasks, now, weekStartsOn), [tasks, now, weekStartsOn])
+  return <MetricTiles metrics={m} />
 }

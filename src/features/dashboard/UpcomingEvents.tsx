@@ -38,12 +38,12 @@ export function UpcomingEvents() {
               key={e.id}
               type="button"
               onClick={() => openCalendar(e.date)}
-              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-amber-100/60 dark:hover:bg-amber-900/30"
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-purple-100/60 dark:hover:bg-purple-900/30"
             >
               <span className="w-20 shrink-0 text-xs font-medium text-slate-500 dark:text-slate-400">
                 {dayLabel(e.date)}
               </span>
-              <span className="w-12 shrink-0 text-xs tabular-nums text-amber-600 dark:text-amber-400">
+              <span className="w-12 shrink-0 text-xs tabular-nums text-purple-600 dark:text-purple-400">
                 {e.time ?? ''}
               </span>
               <span className="min-w-0 flex-1 truncate text-sm">{e.title}</span>

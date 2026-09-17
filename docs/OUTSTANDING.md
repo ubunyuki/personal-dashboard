@@ -45,15 +45,16 @@ running `npm run dev` and a human looking at the screen.
 
 `npm run lint` is green in the sense that nothing fails, but it reports:
 
-- [ ] **H. `react(only-export-components)` ×2 in
-  `src/features/dashboard/tiles.tsx`** — the file defines `MetricsTile` and
-  `TaskBucketsTile` alongside the exported `TILE_REGISTRY`. Same class as the
-  pre-existing warning at `src/components/ui/Card.tsx:26`, and only affects
-  Fast Refresh granularity in dev. Fix by moving the two local tiles into
-  their own files, or suppress both together with Card.tsx.
-  *(M30's equivalent warnings were resolved as they appeared — the operator
-  class maps moved to `src/features/bus/operator.ts` — so this is the whole
-  of it.)*
+- [x] **H. `react(only-export-components)` ×2 in
+  `src/features/dashboard/tiles.tsx`.** Fixed in M34: `MetricsTile` and
+  `TaskBucketsTile` moved next to the presentational components they wrap
+  (`MetricTiles.tsx` and `TaskBucketWidget.tsx`), leaving `tiles.tsx` as the
+  registry alone.
+- [~] **Pre-existing: `react(only-export-components)` in
+  `src/components/ui/Card.tsx`** — the file exports `cardTitleCls` alongside
+  `Card`. Only affects Fast Refresh granularity in dev; splitting the class
+  maps into their own module would separate them from the component whose
+  props they type.
 - [~] **I. Pre-existing: `ExcalidrawCanvas.tsx:96` ref access in cleanup** and
   **`WhiteboardOverlay.tsx:62` set-state-in-effect.** Predate this round;
   listed only so the lint output is fully accounted for.

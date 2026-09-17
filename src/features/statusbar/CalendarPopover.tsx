@@ -166,7 +166,7 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
                     <span className={`h-1 w-1 rounded-full ${sel ? 'bg-white' : 'bg-indigo-500'}`} />
                   )}
                   {(mk?.events ?? 0) > 0 && (
-                    <span className={`h-1 w-1 rounded-full ${sel ? 'bg-amber-200' : 'bg-amber-500'}`} />
+                    <span className={`h-1 w-1 rounded-full ${sel ? 'bg-purple-200' : 'bg-purple-500'}`} />
                   )}
                 </span>
               </button>
@@ -200,7 +200,7 @@ function CalendarPanel({ initialDate }: { initialDate: string | null }) {
           ))}
           {dayEvents.map((e) => (
             <div key={e.id} className="group flex items-center gap-2 rounded-md px-2 py-1 text-sm">
-              <span className="w-12 shrink-0 text-xs tabular-nums text-amber-600 dark:text-amber-400">
+              <span className="w-12 shrink-0 text-xs tabular-nums text-purple-600 dark:text-purple-400">
                 {e.time ?? 'all day'}
               </span>
               <span className="min-w-0 flex-1 truncate">{e.title}</span>

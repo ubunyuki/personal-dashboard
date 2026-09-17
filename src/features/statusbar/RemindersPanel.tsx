@@ -82,7 +82,7 @@ export function RemindersPanel() {
                     onClick={() => pickEvent(e)}
                     className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
-                    <span className="w-12 shrink-0 text-xs tabular-nums text-amber-600 dark:text-amber-400">
+                    <span className="w-12 shrink-0 text-xs tabular-nums text-purple-600 dark:text-purple-400">
                       {e.time ?? 'all day'}
                     </span>
                     <span className="min-w-0 flex-1 truncate">{e.title}</span>
