@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { defaultTaskView, type TaskView } from '../features/tasks/filtering'
 
 export type Tab = 'dashboard' | 'tasks' | 'notes' | 'bookmarks' | 'bus'
 
@@ -34,6 +35,11 @@ type UiState = {
   reviewOpen: boolean
   /** Note to scroll into view + highlight after a palette jump. */
   noteFocusId: string | null
+  /** Filters/sort for the Tasks page. Lives here rather than in TasksPage's
+   *  own state so a dashboard tile can set a filter AND switch tabs in one
+   *  click. Not persisted: a filter you left on last month should not greet
+   *  you as an empty list. */
+  taskView: TaskView
 }
 
 type UiStore = UiState & {
@@ -66,6 +72,11 @@ type UiStore = UiState & {
   closePalette: () => void
   openReview: () => void
   closeReview: () => void
+  setTaskView: (view: TaskView) => void
+  /** Jump to the Tasks tab with a filter already applied — how the metric
+   *  tiles drill through. Starts from the default view so leftover filters
+   *  cannot silently narrow the list the tile promised. */
+  openTasksWith: (patch: Partial<TaskView>) => void
   /** Jump to a note: switches to the Notes tab and marks it for highlight. */
   focusNote: (id: string) => void
   clearNoteFocus: () => void
@@ -91,6 +102,7 @@ export const initialUiState = (): UiState => ({
   paletteOpen: false,
   reviewOpen: false,
   noteFocusId: null,
+  taskView: defaultTaskView(),
 })
 
 export const useUiStore = create<UiStore>()((set) => ({
@@ -185,6 +197,9 @@ export const useUiStore = create<UiStore>()((set) => ({
       calendar: { ...s.calendar, open: false },
     })),
   closeReview: () => set({ reviewOpen: false }),
+  setTaskView: (view) => set({ taskView: view }),
+  openTasksWith: (patch) =>
+    set({ activeTab: 'tasks', taskView: { ...defaultTaskView(), ...patch } }),
   focusNote: (id) => set({ activeTab: 'notes', noteFocusId: id }),
   clearNoteFocus: () => set({ noteFocusId: null }),
 }))

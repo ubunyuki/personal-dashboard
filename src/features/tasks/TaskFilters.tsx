@@ -3,6 +3,7 @@ import type { DueFilter, PriorityFilter, StatusFilter, TaskSort, TaskView } from
 
 const statusOptions: Array<{ value: StatusFilter; label: string }> = [
   { value: 'all', label: 'All' },
+  { value: 'open', label: 'Open' },
   { value: 'todo', label: statusMeta.todo.label },
   { value: 'in-progress', label: statusMeta['in-progress'].label },
   { value: 'done', label: statusMeta.done.label },
@@ -38,6 +39,22 @@ export function TaskFilters({
           </button>
         ))}
       </div>
+      {/* One-click "what's on for this week", the same cut the dashboard
+          metric counts. A toggle rather than a third state in the due select,
+          because it is the filter reached for most often. */}
+      <button
+        type="button"
+        onClick={() =>
+          onChange({ ...view, due: view.due === 'calendarWeek' ? 'all' : 'calendarWeek' })
+        }
+        className={`rounded-md px-2 py-1 text-xs ${
+          view.due === 'calendarWeek'
+            ? 'bg-sky-50 font-medium text-sky-700 dark:bg-sky-950 dark:text-sky-300'
+            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+        }`}
+      >
+        Due this week
+      </button>
       <div className="ml-auto flex items-center gap-2">
         <select
           className={selectCls}
@@ -58,6 +75,7 @@ export function TaskFilters({
           <option value="overdue">Overdue</option>
           <option value="today">Today</option>
           <option value="week">Next 7 days</option>
+          <option value="calendarWeek">This week</option>
           <option value="later">Later</option>
           <option value="none">No date</option>
         </select>

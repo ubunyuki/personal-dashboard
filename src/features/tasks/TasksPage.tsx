@@ -19,17 +19,14 @@ export function TasksPage() {
   const tasks = useAppStore((s) => s.tasks)
   const projectMeta = useAppStore((s) => s.projectMeta)
   const addTask = useAppStore((s) => s.addTask)
+  const weekStartsOn = useAppStore((s) => s.settings.weekStartsOn)
   const openTaskEditor = useUiStore((s) => s.openTaskEditor)
+  // The view lives in the UI store so a dashboard tile can open this page
+  // with a filter already applied.
+  const view = useUiStore((s) => s.taskView)
+  const setView = useUiStore((s) => s.setTaskView)
   const now = useNow()
   const [quickTitle, setQuickTitle] = useState('')
-  const [view, setView] = useState<TaskView>({
-    status: 'all',
-    priority: 'all',
-    due: 'all',
-    sort: 'due',
-    project: 'all',
-    group: 'none',
-  })
 
   const projects = useMemo(() => deriveProjects(tasks, projectMeta), [tasks, projectMeta])
   // A project filter can outlive its project (last task untagged or renamed
@@ -44,8 +41,8 @@ export function TasksPage() {
     [view, projects],
   )
   const visible = useMemo(
-    () => applyTaskView(tasks, effectiveView, now),
-    [tasks, effectiveView, now],
+    () => applyTaskView(tasks, effectiveView, now, weekStartsOn),
+    [tasks, effectiveView, now, weekStartsOn],
   )
   const groups = useMemo(
     () =>
@@ -61,6 +58,7 @@ export function TasksPage() {
   const counts = useMemo<Record<StatusFilter, number>>(
     () => ({
       all: tasks.length,
+      open: tasks.filter((t) => t.status !== 'done').length,
       todo: tasks.filter((t) => t.status === 'todo').length,
       'in-progress': tasks.filter((t) => t.status === 'in-progress').length,
       done: tasks.filter((t) => t.status === 'done').length,

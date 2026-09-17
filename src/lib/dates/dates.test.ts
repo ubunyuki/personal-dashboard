@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildMonthGrid, dueBucketOf, hkHolidayName } from './dates'
+import { buildMonthGrid, dueBucketOf, hkHolidayName, isDueInCalendarWeek } from './dates'
 import { HK_HOLIDAYS, HK_HOLIDAY_YEARS } from './hkHolidays'
 
 const NOW = new Date(2026, 8, 14, 12, 0, 0) // Mon 14 Sep 2026, 12:00 local
@@ -59,6 +59,32 @@ describe('buildMonthGrid', () => {
   it('marks out-of-month cells', () => {
     const grid = buildMonthGrid(2026, 8, 1)
     expect(grid.filter((c) => c.inMonth)).toHaveLength(30)
+  })
+})
+
+describe('isDueInCalendarWeek', () => {
+  // NOW is Mon 14 Sep 2026. Monday-start: 14–20 Sep. Sunday-start: 13–19 Sep.
+  it('covers the whole week around now, both edges included', () => {
+    expect(isDueInCalendarWeek({ dueDate: '2026-09-14' }, NOW, 1)).toBe(true)
+    expect(isDueInCalendarWeek({ dueDate: '2026-09-20' }, NOW, 1)).toBe(true)
+    expect(isDueInCalendarWeek({ dueDate: '2026-09-13' }, NOW, 1)).toBe(false)
+    expect(isDueInCalendarWeek({ dueDate: '2026-09-21' }, NOW, 1)).toBe(false)
+  })
+
+  it('shifts with weekStartsOn', () => {
+    expect(isDueInCalendarWeek({ dueDate: '2026-09-13' }, NOW, 0)).toBe(true)
+    expect(isDueInCalendarWeek({ dueDate: '2026-09-20' }, NOW, 0)).toBe(false)
+  })
+
+  it('disagrees with the rolling "week" bucket, which is the point', () => {
+    // Next Monday is inside dueBucketOf's seven-day window but belongs to
+    // next week — "due this week" must not claim it.
+    expect(dueBucketOf({ dueDate: '2026-09-21' }, NOW)).toBe('week')
+    expect(isDueInCalendarWeek({ dueDate: '2026-09-21' }, NOW, 1)).toBe(false)
+  })
+
+  it('is false without a due date', () => {
+    expect(isDueInCalendarWeek({}, NOW, 1)).toBe(false)
   })
 })
 

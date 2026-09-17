@@ -1,4 +1,4 @@
-import { addDays, format, parseISO } from 'date-fns'
+import { addDays, endOfWeek, format, parseISO, startOfWeek } from 'date-fns'
 import { HK_HOLIDAYS } from './hkHolidays'
 
 export const DATE_FMT = 'yyyy-MM-dd'
@@ -21,6 +21,28 @@ export function dueBucketOf(due: { dueDate?: string; dueTime?: string }, now: Da
   }
   if (due.dueDate <= toLocalDate(addDays(now, 7))) return 'week'
   return 'later'
+}
+
+/** Due inside the CURRENT calendar week — Monday-to-Sunday or Sunday-to-
+ *  Saturday per `weekStartsOn`. Deliberately NOT the same as dueBucketOf's
+ *  'week', which is a rolling seven days from now: on a Friday the rolling
+ *  window reaches into next week, and "due this week" should not. Includes
+ *  days already past in this week, since a task due on Monday is still part
+ *  of this week's load. Not a DueBucket member — that union is a partition
+ *  and this overlaps 'overdue', 'today' and 'week' at once.
+ *
+ *  Both the dashboard metric and the Tasks quick filter call this, so the
+ *  count on the tile and the list it opens can never disagree. */
+export function isDueInCalendarWeek(
+  due: { dueDate?: string },
+  now: Date,
+  weekStartsOn: 0 | 1,
+): boolean {
+  if (!due.dueDate) return false
+  return (
+    due.dueDate >= toLocalDate(startOfWeek(now, { weekStartsOn })) &&
+    due.dueDate <= toLocalDate(endOfWeek(now, { weekStartsOn }))
+  )
 }
 
 export function isTaskOverdue(

@@ -1,6 +1,6 @@
 import { isAfter, parseISO, startOfWeek } from 'date-fns'
 import type { Task, TaskPriority } from '../types'
-import { dueBucketOf, type DueBucket } from '../lib/dates/dates'
+import { dueBucketOf, isDueInCalendarWeek, type DueBucket } from '../lib/dates/dates'
 
 const priorityRank: Record<TaskPriority, number> = { high: 0, medium: 1, low: 2 }
 
@@ -37,6 +37,9 @@ export function taskBuckets(tasks: Task[], now: Date): TaskBuckets {
 export interface Metrics {
   open: number
   doneThisWeek: number
+  /** Not done, dated, and falling in this calendar week — the counterpart to
+   *  doneThisWeek, so the pair reads as "landed" against "still owed". */
+  dueThisWeek: number
   overdue: number
 }
 
@@ -46,6 +49,9 @@ export function metrics(tasks: Task[], now: Date, weekStartsOn: 0 | 1): Metrics 
     open: tasks.filter((t) => t.status !== 'done').length,
     doneThisWeek: tasks.filter(
       (t) => t.completedAt && isAfter(parseISO(t.completedAt), weekStart),
+    ).length,
+    dueThisWeek: tasks.filter(
+      (t) => t.status !== 'done' && isDueInCalendarWeek(t, now, weekStartsOn),
     ).length,
     overdue: taskBuckets(tasks, now).overdue.length,
   }
